@@ -32,8 +32,6 @@ const STYLES = [
     text: 'Each word is a star. A line joins up into a shape like the Big Dipper or Cassiopeia, then the next one starts somewhere else. It looks best on a second screen.' },
   { id: 'pulse', name: 'Pulse', accent: ACCENT.amber, video: '/media/pulse.mp4', poster: '/media/pulse.jpg',
     text: 'Only the word being sung, as big as the screen allows, with the rest of the line small underneath.' },
-  { id: 'lens', name: 'Lens', accent: ACCENT.violet, video: '/media/lens.mp4', poster: '/media/lens.jpg',
-    text: 'The lines sit on a drum that rolls forward as the song goes, with the line being sung in the middle.' },
 ]
 
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches

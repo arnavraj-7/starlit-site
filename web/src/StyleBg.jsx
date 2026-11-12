@@ -5,7 +5,6 @@ import { useEffect, useRef } from 'react'
 //   flow           a grainy gradient: soft, moving, a scroll of colour
 //   constellation  a star field with the figures the style draws (Dipper, Cassiopeia, a belt)
 //   pulse          thermal heat: the one word, hot in the middle
-//   lens           fluted glass: the drum seen through ribbed glass
 const FIGURES = [
   [[0.56, 0.2], [0.62, 0.17], [0.68, 0.19], [0.73, 0.24], [0.79, 0.22], [0.83, 0.3], [0.77, 0.33], [0.73, 0.24]],   // dipper
   [[0.58, 0.7], [0.63, 0.62], [0.68, 0.69], [0.73, 0.6], [0.78, 0.67]],                                              // cassiopeia
@@ -52,7 +51,6 @@ export default function StyleBackdrops({ active }) {
       <div className={L('flow')} />
       <div className={L('constellation')}><canvas /></div>
       <div className={L('pulse')} />
-      <div className={L('lens')} />
     </div>
   )
 }

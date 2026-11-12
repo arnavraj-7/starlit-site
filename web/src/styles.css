@@ -421,10 +421,6 @@ main { position: relative; z-index: 1; }
     radial-gradient(26% 34% at 70% 50%, rgb(255 244 200 / .55), rgb(255 196 90 / .45) 30%, rgb(255 110 70 / .32) 55%, rgb(214 60 140 / .2) 75%, transparent),
     radial-gradient(48% 62% at 72% 52%, rgb(120 40 160 / .3), transparent 75%),
     radial-gradient(18% 22% at 90% 18%, rgb(255 110 70 / .2), transparent 75%); }
-/* fluted glass: vertical ribs catching light over a violet field */
-.sbg--lens { background:
-    repeating-linear-gradient(90deg, rgb(255 255 255 / .05) 0 2px, rgb(255 255 255 / 0) 6px 22px, rgb(0 0 0 / .22) 28px 30px),
-    radial-gradient(50% 70% at 72% 50%, rgb(171 156 255 / .32), rgb(70 60 160 / .12) 60%, transparent 80%); }
 
 /* ---------- hero: the line under the needle, and headline words that warm when you touch them ---------- */
 .needle-line { margin: 0 0 1.5em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .02em; min-height: 1.6em;
