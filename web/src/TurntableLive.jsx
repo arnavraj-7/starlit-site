@@ -46,7 +46,12 @@ export function TurntableParts({ cover, sleeve }) {
         <div className="tt-gloss" />
         <div className="tt-spindle" />
       </div>
-      {sleeve && <div className="tt-sleeve"><img src={sleeve} alt="" /></div>}
+      {sleeve && (
+        <div className="tt-sleeve">
+          <div className="tt-inner" />{/* the paper inner sleeve, showing at the opening */}
+          <div className="tt-jacket"><img src={sleeve} alt="" /></div>
+        </div>
+      )}
       <svg className="tt-arm" viewBox="0 0 100 100">
         <defs>
           <linearGradient id="ttTube" x1="0" x2="1"><stop offset="0" stopColor="#6d6d75" /><stop offset=".45" stopColor="#e9e9ef" /><stop offset="1" stopColor="#55555c" /></linearGradient>

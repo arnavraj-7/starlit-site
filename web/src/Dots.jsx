@@ -182,10 +182,12 @@ export function GrooveRecord() {
       const R0 = c * 0.95, R1 = c * 0.38                      // outer groove, label edge
       const font = `500 ${fs}px "Inter Variable", "Segoe UI", sans-serif`
       const jobs = []
-      for (const [cv, rgb] of [[dim, '226,229,242'], [lit, '255,196,150']]) {
+      for (const [cv, rgb] of [[dim, '226,229,242'], [lit, '255,222,196']]) {
         cv.width = cv.height = Math.round(D * dpr)
         const ctx = cv.getContext('2d')
-        ctx.font = font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+        ctx.font = cv === lit ? font.replace('500', '650') : font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+        // the lit copy glows: the glow is drawn into the canvas once, so turning costs nothing extra
+        if (cv === lit) { ctx.shadowColor = 'rgba(255,160,90,.95)'; ctx.shadowBlur = fs * 0.9 * dpr }
         let k = 0, ring = 0
         for (let r = R0; r > R1; r -= gap, ring++) jobs.push({ ctx, rgb, r, ring, k0: (k += 211) })
       }
@@ -195,7 +197,7 @@ export function GrooveRecord() {
         const t0 = performance.now()
         while (j < jobs.length && performance.now() - t0 < 6) {
           const { ctx, rgb, r, ring, k0 } = jobs[j++]
-          ctx.fillStyle = `rgba(${rgb},${(0.82 + 0.18 * Math.sin(ring * 1.7)).toFixed(2)})`
+          ctx.fillStyle = ctx.shadowBlur ? `rgb(${rgb})` : `rgba(${rgb},${(0.82 + 0.18 * Math.sin(ring * 1.7)).toFixed(2)})`
           // each groove starts somewhere else and stops short of a full turn, like a spiral
           let a = ring * 0.61, k = k0
           const end = a + Math.PI * 2 - (fs * 3) / r
@@ -223,6 +225,7 @@ export function GrooveRecord() {
   return (
     <div className="groove" ref={root} aria-hidden="true">
       <div className="groove-light"><canvas className="groove-spin" /></div>
+      <div className="groove-pool" />
       <div className="groove-needle-light"><canvas className="groove-spin" /></div>
       <div className="groove-label" />
       <svg className="groove-arm" viewBox="0 0 100 100">
@@ -299,6 +302,7 @@ function tonearm(el) {
     // the lit window under the needle: where it is round the record, and which groove
     el.style.setProperty('--na', `${(Math.atan2(y - 50, x - 50) * 180 / Math.PI + 90).toFixed(1)}deg`)
     el.style.setProperty('--nr', `${(r / 50 * 100).toFixed(2)}%`)
+    el.style.setProperty('--nx', `${x.toFixed(2)}%`); el.style.setProperty('--ny', `${y.toFixed(2)}%`)
     el.classList.toggle('is-lit', onRecord && lift < 0.25)
   }
   const tick = now => {
