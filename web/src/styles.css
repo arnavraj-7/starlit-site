@@ -699,3 +699,7 @@ main { position: relative; z-index: 1; }
   .share-vis { height: 440px; }
   .share-vis--stream { height: auto; aspect-ratio: 1040 / 700; }
 }
+
+/* the CC BY photo credit the licences ask for, kept quiet */
+.share-credit { margin: clamp(48px, 7vh, 90px) 0 0; font-size: 12px; color: var(--dim); opacity: .6; max-width: none; }
+.share-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }

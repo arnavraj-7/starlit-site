@@ -711,6 +711,10 @@ function Share() {
             <p>Your Discord status shows the song, its cover and a line of the lyrics as it plays.</p>
           </article>
         </div>
+        <p className="share-credit">
+          Photos: <a href="https://commons.wikimedia.org/wiki/File:Minato_City,_Tokyo,_Japan_(Night).jpg" target="_blank" rel="noopener">Minato City at night</a> by David Kernan, <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>;
+          {' '}<a href="https://commons.wikimedia.org/wiki/File:The_friendliest_cat_we_met_(3866554035).jpg" target="_blank" rel="noopener">The friendliest cat we met</a> by benjgibbs, <a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener">CC BY 2.0</a>. Both cropped.
+        </p>
       </div>
     </section>
   )
