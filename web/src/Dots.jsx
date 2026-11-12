@@ -199,7 +199,6 @@ export function GrooveRecord() {
   return (
     <div className="groove" ref={root} aria-hidden="true">
       <div className="groove-light"><canvas className="groove-spin" /></div>
-      <div className="groove-pool" />
       <div className="groove-needle-light"><canvas className="groove-spin" /></div>
       <div className="groove-label" />
       <svg className="groove-arm" viewBox="0 0 100 100">
@@ -216,7 +215,7 @@ export function GrooveRecord() {
         <g className="ga-arm"><ArmShape /></g>
         <circle cx={ARM.px} cy={ARM.py} r="5.2" fill="url(#gaBase)" stroke="rgb(255 255 255 / .14)" strokeWidth=".2" />
         <circle cx={ARM.px} cy={ARM.py} r="2.1" fill="url(#gaWeight)" stroke="rgb(0 0 0 / .5)" strokeWidth=".15" />
-        <circle className="ga-tip" r="2.4" fill="url(#gaTip)" />
+        <circle className="ga-tip" r=".42" fill="#ffe9d6" />
       </svg>
     </div>
   )
@@ -283,6 +282,7 @@ function tonearm(el) {
     el.style.setProperty('--nr', `${(r / 50 * 100).toFixed(2)}%`)
     el.style.setProperty('--nx', `${x.toFixed(2)}%`); el.style.setProperty('--ny', `${y.toFixed(2)}%`)
     el.classList.toggle('is-lit', onRecord && lift < 0.25)
+    el.__needle = { r, ang: Math.atan2(y - 50, x - 50), lit: onRecord && lift < 0.25 }     // read by NeedleLine
   }
   const tick = now => {
     const dt = Math.min(0.05, (now - last) / 1000); last = now
@@ -322,4 +322,61 @@ function tonearm(el) {
   const go = () => { target = angleFor(grooveAt(R0 * 0.82)); run(); setTimeout(() => { liftTarget = 0; run() }, 900) }
   const t0 = setTimeout(go, 2200)
   return () => { clearTimeout(t0); cancelAnimationFrame(raf); svg.removeEventListener('pointerdown', down); svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); svg.removeEventListener('pointercancel', up) }
+}
+
+// ---------------------------------------------------------------- the line under the needle
+// The hero's left side reads what the needle is on: the lyric line in the groove under it, with
+// the word passing beneath the stylus lit. It follows the turning record, and changes when you move
+// the arm. The groove's layout is worked out here the same way the worker drew it.
+export function NeedleLine() {
+  const ref = useRef(null)
+  const [line, setLine] = useState(null)
+  useEffect(() => {
+    const rec = document.querySelector('.groove')
+    if (!rec) return
+    const spin = rec.querySelector('.groove-spin')
+    const ctx = document.createElement('canvas').getContext('2d')
+    const text = LYRICS.replace(/ \/ /g, '\u2003\u2003')
+    const rings = new Map()
+    const geom = () => { const D = rec.clientWidth, fs = Math.max(9, Math.min(13, D / 140)); return { D, c: D / 2, fs, gap: fs * 2.9 } }
+    const ring = n => {                                         // where each letter of groove n sits (radians)
+      if (rings.has(n)) return rings.get(n)
+      const { c, fs, gap } = geom(), r = c * 0.95 - n * gap
+      ctx.font = `500 ${fs}px "Inter Variable", sans-serif`
+      let a = n * 0.61, i = 211 * (n + 1)
+      const end = a + Math.PI * 2 - (fs * 3) / r, out = []
+      while (true) {
+        const ch = text[i % text.length], w = ctx.measureText(ch).width + fs * 0.08
+        if (a + w / r > end) break
+        out.push([i % text.length, a + w / 2 / r]); a += w / r; i++
+      }
+      rings.set(n, out); return out
+    }
+    let last = ''
+    const tick = () => {
+      const nd = rec.__needle
+      if (!nd || !nd.lit) { if (last) { last = ''; setLine(null) } return }
+      const { c, gap } = geom(), n = Math.round((c * 0.95 - nd.r / 50 * c) / gap)
+      const anim = spin && spin.getAnimations()[0]
+      const rho = anim ? ((Number(anim.currentTime) || 0) % 150000) / 150000 * Math.PI * 2 : 0
+      const want = nd.ang - rho                                   // the record has turned under the needle
+      let best = null, bd = 9
+      for (const [i, m] of ring(n)) { const d = Math.abs(((m - want) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI); if (d < bd) { bd = d; best = i } }
+      if (best === null || bd > 0.2) return
+      const s = text.lastIndexOf('\u2003', best) + 1, e = text.indexOf('\u2003', best)
+      const words = text.slice(s, e < 0 ? undefined : e).split(' ')
+      let at = 0, cur = 0
+      for (let j = 0; j < words.length; j++) { if (best - s >= at) cur = j; at += words[j].length + 1 }
+      const key = s + ':' + cur
+      if (key !== last) { last = key; setLine({ words, cur }) }
+    }
+    const id = setInterval(tick, 110)
+    return () => clearInterval(id)
+  }, [])
+  return (
+    <p className={`needle-line ${line ? 'is-on' : ''}`} ref={ref} aria-live="off">
+      <span className="nl-dot" aria-hidden="true" />
+      {line ? line.words.map((w, j) => <span key={j} className={j < line.cur ? 'sung' : j === line.cur ? 'now' : ''}>{w} </span>) : <span>Put the needle on the record</span>}
+    </p>
+  )
 }

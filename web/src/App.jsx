@@ -5,7 +5,7 @@ import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import EdgeLight from './EdgeLight.jsx'
-import { StippleSky, HalftoneRecord, GrooveRecord } from './Dots.jsx'
+import { StippleSky, HalftoneRecord, GrooveRecord, NeedleLine } from './Dots.jsx'
 import StyleBackdrops from './StyleBg.jsx'
 import TurntableLive from './TurntableLive.jsx'
 import TurntableScene from './TurntableScene.jsx'
@@ -225,6 +225,7 @@ function Hero() {
           <Sung as="h1" text="Every word, the moment it’s sung." />
           <div className="hero-side">
             <p className="lead">Starlit is a Windows app that shows the lyrics of whatever you’re playing. Each word lights up as it’s sung, and the screen takes its colours from the album cover.</p>
+            <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
                 <a className="btn" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
