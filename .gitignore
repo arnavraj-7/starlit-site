@@ -1,0 +1,24 @@
+node_modules/
+dist/
+*.log
+
+# working output of the capture and check scripts
+assets-src/raw/
+assets-src/shots*/
+assets-src/sweep*/
+assets-src/trace.json
+assets-src/sheet.jpg
+assets-src/logo/check-*.jpg
+assets-src/logo/sheet.jpg
+assets-src/logo/site-mark.jpg
+
+# one-off patch scripts and backups from design rounds
+assets-src/bak*/
+assets-src/*_patch*.py
+assets-src/patch_*.py
+assets-src/round*_*.py
+assets-src/fix*.py
+assets-src/extra.css
+assets-src/probe_*.js
+# rejected AI backgrounds (the page draws its own now)
+assets-src/bg/
