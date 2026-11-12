@@ -7,10 +7,7 @@ import { useGSAP } from '@gsap/react'
 const FEATURES = [
   { id: 'colour', title: 'Every song brings its own colours', text: 'The lyrics, the glow and the light around them all take their colour from the album cover.', spec: 'Picked from the artwork, song by song' },
   { id: 'edge', title: 'Your screen moves with the beat', text: 'A thin line of light circles the edge of your screen and jumps on every beat you hear.', spec: 'Follows the music as it plays' },
-  { id: 'players', title: 'Works with whatever you play', text: 'Spotify, Apple Music, YouTube Music or your own files. Nothing to sign in to, nothing to set up.', spec: 'Spotify · Apple Music · YouTube Music · files' },
-  { id: 'screens', title: 'Lyrics on one screen, life on the other', text: 'Put the words on a second monitor or your laptop, and keep working, studying or playing on the main one.', spec: 'One screen or two' },
-  { id: 'games', title: 'Never costs you a frame', text: 'Start a fullscreen game and Starlit steps right back, then comes straight back when you quit.', spec: 'Your game gets the GPU' },
-  { id: 'lights', title: 'Your desk lights sing along', text: 'Light bars, keyboards and docks glow in the colour of the song that is playing.', spec: 'RGB bars · keyboards · docks' },
+  { id: 'games', title: 'Invisible when you’re in a match', text: 'Start a fullscreen game and Starlit steps right back, then comes straight back when you quit.', spec: 'Never touches the game itself' },
 ]
 
 // Each feature is shown by the app itself: a short clip recorded from Starlit (assets-src, the

@@ -17,7 +17,7 @@ async def main(ps):
         for y in range(0, int(top), H):
             await pg.evaluate(f'window.scrollTo(0,{y})'); await pg.wait_for_timeout(120)
         for v in ps:
-            y = top + float(v) / 5 * (6 * 0.85 * H)
+            y = top + float(v) / 2 * (3 * 0.85 * H)
             await pg.evaluate(f'window.scrollTo(0,{y})'); await pg.wait_for_timeout(1800)
             path = os.path.join(OUT, f'feat3d-{v}.png')
             await pg.screenshot(path=path); print(path)

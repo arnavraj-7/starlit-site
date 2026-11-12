@@ -2,15 +2,15 @@
 .features { position: relative; }
 .feat-pin { position: relative; height: 100vh; overflow: hidden; }
 /* the app's own footage, on the right, one clip per feature, cross-fading */
-.feat-clips { position: absolute; right: max(4vw, calc((100vw - var(--wrap, 1800px)) / 2)); top: 50%; translate: 0 -50%; width: min(52vw, 1240px); aspect-ratio: 16 / 10; }
+.feat-clips { position: absolute; right: max(4vw, calc((100vw - var(--wrap, 1800px)) / 2)); top: 50%; translate: 0 -50%; width: min(44vw, 1150px); aspect-ratio: 16 / 9; }
 .feat-clip { position: absolute; inset: 0; opacity: 0; transform: scale(.97); transition: opacity .8s var(--ease), transform 1.1s var(--ease); }
 .feat-clip.is-on { opacity: 1; transform: none; }
-.feat-clip video { width: 100%; height: 100%; object-fit: cover; border-radius: clamp(12px, 1vw, 20px); background: #05060c;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .08), 0 60px 140px -30px rgb(0 0 0 / .9); }
+.feat-clip video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; background: #05060c;
+  border: 1px solid rgb(255 255 255 / .12); border-top-color: rgb(255 255 255 / .2); box-shadow: 0 60px 140px -30px rgb(0 0 0 / .9); }
 .feat-copy { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .feat-count { position: absolute; top: clamp(70px, 13vh, 150px); font: 500 clamp(.85rem, .8vw, 1.15rem)/1 var(--mono, ui-monospace, monospace); letter-spacing: .14em; color: var(--dim); }
 .feat-count b { color: var(--paper); font-weight: 600; }
-.fc { position: absolute; max-width: min(42vw, 760px); opacity: 0; transform: translateY(26px); pointer-events: none;
+.fc { position: absolute; max-width: min(31vw, 620px); opacity: 0; transform: translateY(26px); pointer-events: none;
   transition: opacity .55s var(--ease), transform .8s var(--ease); }
 .fc.is-on { opacity: 1; transform: none; pointer-events: auto; transition-delay: .12s; }
 .fc-title { margin: 0 0 .45em; font-size: clamp(2.6rem, 4.3vw, 6.6rem); font-weight: 800; line-height: 1.0; letter-spacing: -.038em; max-width: 12ch; text-wrap: balance; }
