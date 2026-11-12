@@ -238,7 +238,7 @@ function Hero() {
         <div className="hero-row">
           <Sung as="h1" text="Every word, the moment it’s sung." />
           <div className="hero-side">
-            <p className="lead">Starlit is a Windows app that shows the lyrics of whatever you’re playing. Each word lights up as it’s sung, and the screen takes its colours from the album cover.</p>
+            <p className="lead">Live lyrics for whatever’s playing on your PC.</p>
             <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
