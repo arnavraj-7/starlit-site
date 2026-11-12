@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starlit · Privacy</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #070912; color: #e9e8f0; font: 17px/1.65 Inter, "Segoe UI", system-ui, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 72px 20px 96px; }
+  h1 { font-size: 34px; line-height: 1.15; margin: 0 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 19px; margin: 40px 0 8px; }
+  p, li { color: #b9b8c6; }
+  ul { padding-left: 1.2em; }
+  a { color: #ffaa6a; }
+  .date { color: #7d7c8c; font-size: 14px; margin: 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Privacy</h1>
+  <p class="date">Starlit and the Starlit bridge browser extension · 13 November 2026</p>
+
+  <h2>The short version</h2>
+  <p>Starlit has no accounts, no analytics and no servers of its own. What it learns about your music stays on your PC.</p>
+
+  <h2>The browser extension</h2>
+  <p>On the music sites it supports (Apple Music, Spotify, YouTube Music, YouTube, SoundCloud and a few others), the extension reads:</p>
+  <ul>
+    <li>the playing song's title, artist, album and cover image address,</li>
+    <li>the playback position and whether it is paused,</li>
+    <li>on Apple Music, the timed lyrics the player itself loads for its lyrics view.</li>
+  </ul>
+  <p>It sends this only to the Starlit app on the same PC, at <code>127.0.0.1</code>. Nothing goes to any other computer. It doesn't read other sites, your history, passwords, or anything you type. When Starlit asks, it can press the player's own next, previous and seek controls.</p>
+
+  <h2>The Starlit app</h2>
+  <ul>
+    <li>To find lyrics and covers, it sends the song's title, artist and length to <a href="https://lrclib.net">LRCLIB</a> and Apple's iTunes Search. No information about you goes with it.</li>
+    <li>Lyrics and covers it has found are kept in a cache on your PC. Settings are stored there too.</li>
+    <li>Optional features only work while you turn them on: Discord status (sends the song to the Discord app on your PC), the phone screen (a page on your home network, protected by a code) and the OBS overlay (on this PC only).</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>Questions: <a href="https://github.com/arnavraj-7/starlit-releases/issues">open an issue</a>.</p>
+</main>
+</body>
+</html>
