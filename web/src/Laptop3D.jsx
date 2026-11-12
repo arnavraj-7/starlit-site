@@ -288,7 +288,7 @@ function Model({ progress, pointer, haloRef }) {
     const eu = edge.current && edge.current.uniforms
     if (eu && eu.uAmt) { eu.uTime.value = t; eu.uColor.value.copy(s.accent); eu.uAmt.value = 0.25 * wake * (1 - out) + 1.1 * edgeOn }
     // the screen: dark until it wakes; it dims as the word leaves it, and holds that word while close
-    if (screenMat.current) screenMat.current.color.setScalar(THREE.MathUtils.lerp(0.04, 1, wake) * (1 - 0.82 * out))
+    if (screenMat.current) screenMat.current.color.setScalar(THREE.MathUtils.lerp(0.04, 1, wake) * (1 - out))   // dark while the word is out, so the small lines never show through it
     if (wake > 0.01 && t - s.drawn > 1 / 30) { s.drawn = t; pulse.draw(t, p > 0.47 && p < 0.76) }
   })
 

@@ -208,7 +208,7 @@ function Hero() {
     const wws = words.map(w => w.parentElement)
     const TIMES = [0.46, 0.52, 0.2, 0.5, 0.22, 0.95]             // how long each word is held
     const GAPS = [0, 0.04, 0.3, 0.03, 0.12, 0.05]                 // breath before it
-    const glow = a => `drop-shadow(0 0 ${(0.28 * a).toFixed(3)}em rgb(255 236 220 / ${(0.55 * a).toFixed(3)}))`
+    const glow = a => `drop-shadow(0 0 ${(0.07 * a).toFixed(3)}em rgb(255 244 236 / ${(0.45 * a).toFixed(3)}))`   // a tight sheen on the letters, never a haze around the word
     let sing = null
     const singLine = (from = 0) => {
       if (sing) sing.kill()
