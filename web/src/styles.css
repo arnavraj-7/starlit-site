@@ -461,16 +461,13 @@ main { position: relative; z-index: 1; }
 .needle-line.is-on .nl-dot { opacity: 1; animation: nl-beat 1.2s ease-in-out infinite; }
 @keyframes nl-beat { 50% { box-shadow: 0 0 0 .55em rgb(255 170 106 / .05), 0 0 20px rgb(255 160 90 / .9); } }
 @media (prefers-reduced-motion: reduce) { .needle-line.is-on .nl-dot { animation: none; } }
-@media (hover: hover) {
-  /* on the inner word: the intro animates the outer one, and a transition there would fight it */
-  .hero h1 .ww .w { transition: transform .5s var(--ease); }
-  .hero h1 .ww:hover .w { transform: translateY(-.04em); }
-}
 
-/* the headline's words carry their own light: a warm half and a plain half of a gradient, clipped to
-   the letters, slid across to sing the word (feathered, like the app's wipe) */
-.hero h1 .w { color: transparent; -webkit-background-clip: text; background-clip: text;
-  background-image: linear-gradient(90deg, #ffe1c8 0%, #ffbf8f 44%, var(--paper) 56%, var(--paper) 100%);
-  background-size: 230% 100%; background-repeat: no-repeat; background-position: 100% 0;
-  padding-block: .16em .26em; margin-block: -.16em -.26em; }   /* the light reaches ascenders and descenders too */
-.no-motion .hero h1 .w { background-position: 100% 0; }
+/* the headline is sung like a lyric: under each word a dim copy (the line still to come), over it
+   the lit word, uncovered left to right by a feathered edge (--sungAt runs 100% -> 0%) */
+@property --sungAt { syntax: '<percentage>'; inherits: false; initial-value: 100%; }
+.hero h1.sung .ww::before { color: rgb(238 240 248 / .2); }
+.hero h1.sung .w { color: #fff; opacity: 1;
+  -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--sungAt) * 1.12), transparent calc(112% - var(--sungAt) * 1.12));
+          mask-image: linear-gradient(90deg, #000 calc(100% - var(--sungAt) * 1.12), transparent calc(112% - var(--sungAt) * 1.12));
+  padding-block: .16em .26em; margin-block: -.16em -.26em; }   /* room for ascenders, descenders and the bloom */
+.no-motion .hero h1.sung .w { --sungAt: 0%; }
