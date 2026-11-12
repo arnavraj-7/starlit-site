@@ -1,4 +1,4 @@
-/* Starlit site. One family (Mukta, the face Starlit sets lyrics in) on a deep ink ground.
+/* Starlit site. One family (Inter, the face Starlit sets lyrics in) on a deep ink ground.
    Each section has its own album colour, declared on the section; only the two places where the
    colour changes while you watch (the style picker and the colour demo) animate it, and only
    inside themselves. */
@@ -51,7 +51,7 @@ html:not(.is-in) .edge-light { opacity: 0; }
 html, body { margin: 0; background: var(--ink); }
 body {
   color: var(--paper);
-  font-family: 'Mukta', 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Inter Variable', 'Segoe UI', system-ui, sans-serif;
   font-size: var(--fs-body);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

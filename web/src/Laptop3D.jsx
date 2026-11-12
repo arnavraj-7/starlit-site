@@ -44,7 +44,7 @@ function Keys({ legendRef }) {
     g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'
     for (const k of keys) {
       if (k.l === '_') continue
-      g.font = `600 ${k.l.length > 1 ? 34 : 60}px Mukta, "Segoe UI", sans-serif`
+      g.font = `600 ${k.l.length > 1 ? 34 : 60}px "Inter Variable", "Segoe UI", sans-serif`
       g.fillText(k.l, (k.u + 7.5) * U, (k.ri + 0.5) * U + 4)
     }
     const t = new THREE.CanvasTexture(c)

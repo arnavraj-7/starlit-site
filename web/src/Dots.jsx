@@ -180,7 +180,7 @@ export function GrooveRecord() {
       const fs = Math.max(9, Math.min(13, D / 140))
       const gap = fs * 2.3                                   // air between grooves
       const R0 = c * 0.95, R1 = c * 0.38                      // outer groove, label edge
-      const font = `500 ${fs}px Mukta, "Segoe UI", sans-serif`
+      const font = `500 ${fs}px "Inter Variable", "Segoe UI", sans-serif`
       const jobs = []
       for (const [cv, rgb] of [[dim, '226,229,242'], [lit, '255,196,150']]) {
         cv.width = cv.height = Math.round(D * dpr)
