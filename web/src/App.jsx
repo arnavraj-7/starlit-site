@@ -150,7 +150,7 @@ function MiniPlayer({ video }) {
       <button className="mini-play" onClick={toggle} aria-label={playing ? 'Pause the preview' : 'Play the preview'}>
         {playing
           ? <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z" /></svg>
-          : <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15L19.5 12z" /></svg>}
+          : <svg className="ic-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15L19.5 12z" /></svg>}
       </button>
     </div>
   )
