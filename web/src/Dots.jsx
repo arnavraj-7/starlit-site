@@ -1,6 +1,8 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// the record's type is drawn in a worker, which needs the font file itself
+import interUrl from '@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2?url'
 
 // The page's backgrounds are all made of dots and letters, drawn in code at the screen's own
 // resolution from small source pictures (generated with Gemini, in public/media/src). The
@@ -174,53 +176,25 @@ export function GrooveRecord() {
     const el = root.current
     const [dim, lit] = el.querySelectorAll('canvas')
     let alive = true
-    const draw = () => {
-      const dpr = Math.min(devicePixelRatio || 1, 1.5)
-      const D = el.clientWidth, c = D / 2
-      const fs = Math.max(9, Math.min(13, D / 140))
-      const gap = fs * 2.3                                   // air between grooves
-      const R0 = c * 0.95, R1 = c * 0.38                      // outer groove, label edge
-      const font = `500 ${fs}px "Inter Variable", "Segoe UI", sans-serif`
-      const jobs = []
-      for (const [cv, rgb] of [[dim, '226,229,242'], [lit, '255,222,196']]) {
-        cv.width = cv.height = Math.round(D * dpr)
-        const ctx = cv.getContext('2d')
-        ctx.font = cv === lit ? font.replace('500', '650') : font; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-        // the lit copy glows: the glow is drawn into the canvas once, so turning costs nothing extra
-        if (cv === lit) { ctx.shadowColor = 'rgba(255,160,90,.95)'; ctx.shadowBlur = fs * 0.9 * dpr }
-        let k = 0, ring = 0
-        for (let r = R0; r > R1; r -= gap, ring++) jobs.push({ ctx, rgb, r, ring, k0: (k += 211) })
+    // drawn in a worker (thousands of rotated, glowing letters); shown here without redrawing
+    // two workers, one per copy, so both are ready in half the time
+    let left = 2
+    const workers = [[dim, false], [lit, true]].map(([cv, isLit]) => {
+      const w = new Worker(new URL('./groove.worker.js', import.meta.url), { type: 'module' })
+      w.onmessage = ({ data: { bm, error } }) => {
+        w.terminate()
+        if (!alive || error || !bm) return
+        cv.width = bm.width; cv.height = bm.height; cv.getContext('bitmaprenderer').transferFromImageBitmap(bm)
+        if (--left === 0) el.classList.add('is-drawn')
       }
-      let j = 0
-      const slice = () => {
-        if (!alive) return
-        const t0 = performance.now()
-        while (j < jobs.length && performance.now() - t0 < 6) {
-          const { ctx, rgb, r, ring, k0 } = jobs[j++]
-          ctx.fillStyle = ctx.shadowBlur ? `rgb(${rgb})` : `rgba(${rgb},${(0.82 + 0.18 * Math.sin(ring * 1.7)).toFixed(2)})`
-          // each groove starts somewhere else and stops short of a full turn, like a spiral
-          let a = ring * 0.61, k = k0
-          const end = a + Math.PI * 2 - (fs * 3) / r
-          while (true) {
-            const ch = LYRICS[k++ % LYRICS.length]
-            const w = ctx.measureText(ch).width + fs * 0.08
-            if (a + w / r > end) break
-            const m = a + w / 2 / r, x = c + r * Math.cos(m), y = c + r * Math.sin(m), t = m + Math.PI / 2
-            ctx.setTransform(dpr * Math.cos(t), dpr * Math.sin(t), -dpr * Math.sin(t), dpr * Math.cos(t), dpr * x, dpr * y)
-            if (ch !== ' ') ctx.fillText(ch, 0, 0)
-            a += w / r
-          }
-        }
-        if (j < jobs.length) requestAnimationFrame(slice); else el.classList.add('is-drawn')
-      }
-      slice()
-    }
-    document.fonts.ready.then(() => alive && draw())
+      w.postMessage({ D: el.clientWidth, dpr: Math.min(devicePixelRatio || 1, 1.5), fontUrl: new URL(interUrl, location.href).href, lyrics: LYRICS, lit: isLit })
+      return w
+    })
     // only turns while it can be seen
     const io = new IntersectionObserver(([e]) => el.classList.toggle('is-off', !e.isIntersecting))
     io.observe(el)
     const stopArm = tonearm(el)
-    return () => { alive = false; io.disconnect(); stopArm() }
+    return () => { alive = false; workers.forEach(w => w.terminate()); io.disconnect(); stopArm() }
   }, [])
   return (
     <div className="groove" ref={root} aria-hidden="true">
