@@ -10,7 +10,7 @@ import StyleBackdrops from './StyleBg.jsx'
 import TurntableLive from './TurntableLive.jsx'
 import TurntableScene from './TurntableScene.jsx'
 import Features from './Features.jsx'
-import { Mark, Footer } from './Chrome.jsx'
+import { Logo, Footer } from './Chrome.jsx'
 import './features.css'
 import './chrome.css'
 // From React Bits (reactbits.dev, MIT + Commons Clause): copied in as source.

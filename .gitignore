@@ -25,3 +25,11 @@ assets-src/bg/
 assets-src/logo/out/check.jpg
 assets-src/round*.py
 assets-src/*.jsx.txt
+
+assets-src/feat3d/model/
+assets-src/feat3d/*.png
+assets-src/feat3d/*.jpg
+assets-src/feat3d/log-*.txt
+assets-src/logo/out/*.png
+assets-src/logo/out/*.json
+assets-src/logo/out/*.html

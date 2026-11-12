@@ -116,8 +116,19 @@ main { position: relative; z-index: 1; }
 /* ---------- hero ---------- */
 .hero { padding-top: clamp(104px, 15vh, 176px); }
 .hero > .masthead { position: absolute; left: 0; right: 0; top: clamp(22px, 3.4vh, 40px); z-index: 2; }
-.brand { display: inline-flex; align-items: center; gap: .5em; font-weight: 800; font-size: clamp(1.2rem, 1.05vw, 1.6rem); letter-spacing: -.02em; text-decoration: none; }
-.brand svg { width: 1.15em; height: 1.15em; color: var(--accent); filter: drop-shadow(0 0 8px var(--glow)); }
+.brand { display: inline-flex; align-items: center; text-decoration: none; color: var(--paper); line-height: 0; }
+/* the lockup: type in paper, the ring in the section's colour, the i's glint in warm light */
+.brand .logo { height: clamp(26px, 1.75vw, 40px); width: auto; overflow: visible; }
+.brand .lg-mark { color: var(--accent); filter: drop-shadow(0 0 8px var(--glow)); }
+.brand .lg-glint { transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 0 5px rgb(255 170 106 / .75));
+  animation: lg-twinkle 1.1s cubic-bezier(.2, .7, .3, 1) 1.4s both; transition: transform .6s var(--ease), filter .6s var(--ease); }
+.brand .lg-sat { transform-box: view-box; transform-origin: 74px 80px; transition: transform .9s var(--ease); }
+@media (hover: hover) {
+  .brand:hover .lg-glint { transform: rotate(45deg) scale(1.25); filter: drop-shadow(0 0 9px rgb(255 170 106 / .95)); }
+  .brand:hover .lg-sat { transform: rotate(38deg); }      /* the satellite moves on round its orbit */
+}
+@keyframes lg-twinkle { 0% { transform: scale(0) rotate(-90deg); opacity: 0; } 60% { transform: scale(1.35) rotate(10deg); opacity: 1; } 100% { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .brand .lg-glint { animation: none; } .brand .lg-glint, .brand .lg-sat { transition: none; } }
 .hero h1 {
   margin: 0; font-size: var(--fs-display); font-weight: 800; line-height: .94; letter-spacing: -.04em;
   max-width: 11ch; text-wrap: balance;
