@@ -514,3 +514,33 @@ main { position: relative; z-index: 1; }
 
 /* the headline just rises in, plain white: no dim copy underneath */
 .hero h1.sung .ww::before { display: none; }
+
+/* ---------- take it off the screen: phone, cards, stream ---------- */
+.share-sec { position: relative; }
+.share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 80px); margin-top: clamp(40px, 6vh, 80px); align-items: start; }
+.share-item h3 { margin: 28px 0 8px; font-size: var(--fs-h3); font-weight: 800; letter-spacing: -.02em; }
+.share-item p { margin: 0; color: var(--mute); max-width: 34ch; line-height: 1.5; }
+.share-vis { height: clamp(320px, 46vh, 560px); display: grid; place-items: end center; position: relative; }
+/* a plain phone: rounded glass, thin bezel, the real screen inside */
+.share-phone { position: absolute; bottom: 0; left: 50%; translate: -50% 0; height: 100%; aspect-ratio: 9 / 18.2; border-radius: clamp(26px, 2.4vw, 44px); padding: clamp(6px, .5vw, 9px); background: #0d0f16;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .12), inset 0 1px 0 rgb(255 255 255 / .1), 0 50px 100px -30px rgb(0 0 0 / .9); }
+.share-phone img { position: absolute; inset: clamp(6px, .5vw, 9px); width: calc(100% - 2 * clamp(6px, .5vw, 9px)); height: calc(100% - 2 * clamp(6px, .5vw, 9px)); object-fit: cover; object-position: top; border-radius: calc(clamp(26px, 2.4vw, 44px) - 7px); display: block; }
+/* saved cards, fanned like a hand; they spread a little more when pointed at */
+.share-cards img { position: absolute; bottom: 0; left: 50%; height: 92%; aspect-ratio: 9 / 16; border-radius: 14px; object-fit: cover;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 80px -30px rgb(0 0 0 / .9); transition: transform .7s var(--ease); transform-origin: 50% 100%; }
+.share-cards img:nth-child(1) { transform: translateX(-84%) rotate(-9deg); }
+.share-cards img:nth-child(2) { transform: translateX(-16%) rotate(9deg); }
+.share-cards img:nth-child(3) { transform: translateX(-50%); }
+.share-cards:hover img:nth-child(1) { transform: translateX(-96%) rotate(-13deg); }
+.share-cards:hover img:nth-child(2) { transform: translateX(-4%) rotate(13deg); }
+.share-cards:hover img:nth-child(3) { transform: translate(-50%, -4%); }
+/* the overlay as a stream would show it: over a dark scene, lower third */
+.share-stream { width: 100%; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; display: grid; place-items: end center; padding-bottom: 12%;
+  background: radial-gradient(80% 70% at 30% 30%, #2a3354, transparent 70%), radial-gradient(70% 60% at 80% 80%, #3d2a30, transparent 70%), #0e1018;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 80px -30px rgb(0 0 0 / .9); }
+.share-stream img { width: 86%; }
+.share-foot { margin: clamp(40px, 6vh, 70px) 0 0; color: var(--dim); font-size: var(--fs-lead); }
+@media (max-width: 860px) {
+  .share-grid { grid-template-columns: 1fr; gap: 64px; }
+  .share-vis { height: 420px; }
+}

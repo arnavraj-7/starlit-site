@@ -468,6 +468,46 @@ function Styles() {
   )
 }
 
+// Beyond the PC's own screens: a phone, a post, a stream. Each shown with what the app really
+// makes (a phone running it, saved cards, the OBS overlay).
+function Share() {
+  const root = useRef(null)
+  useGSAP(() => {
+    if (reduceMotion()) return
+    gsap.from('.share-item', { opacity: 0, y: 60, duration: 1.1, ease: 'expo.out', stagger: 0.12,
+      scrollTrigger: { trigger: '.share-grid', start: 'top 80%' } })
+  }, { scope: root })
+  return (
+    <section className="section share-sec" id="share" ref={root}>
+      <div className="wrap">
+        <Sung as="h2" className="h2 sung-scroll" text="Take it off the screen." />
+        <div className="share-grid">
+          <article className="share-item">
+            <div className="share-vis"><div className="share-phone"><img src="/media/share/phone.webp" alt="Starlit running on a phone" loading="lazy" /></div></div>
+            <h3>Your phone is a screen too</h3>
+            <p>Scan the code in Settings and any phone or tablet on your Wi-Fi shows the lyrics. Nothing to install.</p>
+          </article>
+          <article className="share-item">
+            <div className="share-vis share-cards">
+              <img src="/media/share/card0.webp" alt="" loading="lazy" />
+              <img src="/media/share/card1.webp" alt="" loading="lazy" />
+              <img src="/media/share/card2.webp" alt="A lyric card saved by Starlit" loading="lazy" />
+            </div>
+            <h3>Keep the line that hit</h3>
+            <p>Press Ctrl+Alt+S to save the moment as a card or a 10-second clip, ready for your story.</p>
+          </article>
+          <article className="share-item">
+            <div className="share-vis"><div className="share-stream"><img src="/media/share/obs.webp" alt="The OBS lyric overlay" loading="lazy" /></div></div>
+            <h3>Lyrics on your stream</h3>
+            <p>One link in OBS puts a clean, transparent lyric line over whatever you stream.</p>
+          </article>
+        </div>
+        <p className="share-foot">Your Discord status can show what you’re listening to, too.</p>
+      </div>
+    </section>
+  )
+}
+
 // The record change, played by the scroll on the real turntable (see TurntableScene).
 function Turntable() {
   const root = useRef(null)
@@ -599,6 +639,7 @@ export default function App() {
         <Styles />
         <Laptop />
         <Features />
+        <Share />
         <Turntable />
         <Setup />
         <Finale />
