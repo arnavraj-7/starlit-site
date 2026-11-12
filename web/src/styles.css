@@ -533,8 +533,8 @@ main { position: relative; z-index: 1; }
 
 
 /* ---------- take it off the screen: a 2x2 of big, plain previews ---------- */
-.share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(48px, 6vw, 120px) clamp(32px, 5vw, 110px); margin-top: clamp(40px, 6vh, 80px); align-items: start; }
-.share-vis { height: clamp(380px, 52vh, 620px); display: grid; place-items: center; position: relative; }
+.share-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(48px, 6vw, 120px) clamp(32px, 5vw, 110px); margin-top: clamp(40px, 6vh, 80px); align-items: start; }
+.share-vis { height: clamp(380px, 52vh, 620px); display: grid; place-items: center; position: relative; contain: inline-size; }
 .share-item h3 { margin: 30px 0 8px; font-size: clamp(1.5rem, 1.7vw, 2.5rem); font-weight: 800; letter-spacing: -.025em; }
 .share-item p { margin: 0; color: var(--mute); max-width: 40ch; line-height: 1.5; font-size: var(--fs-lead); }
 
@@ -578,39 +578,124 @@ main { position: relative; z-index: 1; }
 .share-cards:hover img:nth-child(2) { transform: translateX(4%) rotate(14deg); }
 .share-cards:hover img:nth-child(3) { transform: translate(-50%, -4%); }
 
-/* a stream: a game scene, the live badge, chat, and Starlit's line across the lower third */
-.stream { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 50px 100px -35px rgb(0 0 0 / .95); }
-.stream-scene { position: absolute; inset: 0; width: 100%; height: 100%; }
-.stream-live { position: absolute; top: 5%; left: 4%; display: inline-flex; align-items: center; gap: .45em; padding: .35em .75em; border-radius: 6px;
-  font: 800 clamp(.65rem, .7vw, .95rem)/1 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: #e5484d; }
-.stream-live i { width: .5em; height: .5em; border-radius: 50%; background: #fff; }
-.stream-chat { position: absolute; top: 5%; right: 3.5%; width: 27%; display: grid; gap: .35em; padding: .7em .8em; border-radius: 8px;
-  background: rgb(10 8 18 / .62); font: 500 clamp(.62rem, .55vw, .82rem)/1.35 Inter, sans-serif; color: rgb(255 255 255 / .85); }
-.stream-chat p { margin: 0; font-size: inherit; line-height: inherit; color: inherit; max-width: none; }   /* not the captions' paragraph style */
-.stream-chat b { margin-right: .4em; }
-.stream-overlay { position: absolute; left: 50%; bottom: 6%; translate: -50% 0; width: 78%; filter: drop-shadow(0 4px 18px rgb(0 0 0 / .55)); }
+/* OBS Studio 32 on Windows, its default dark theme (Yami) and dock layout, drawn at 1040 x 700 px
+   and zoomed to fit (useFit). Colours are OBS's own: window #1d1f26, docks #272a33, dock titles and
+   buttons #3c404d, preview #13141a, selection #284cb8. */
+.stream { position: relative; flex: none; width: 1040px; height: 700px; display: flex; flex-direction: column; overflow: hidden; border-radius: 8px;
+  background: #1d1f26; color: #fefefe; font: 400 12px/1.2 'Open Sans', 'Segoe UI', system-ui, sans-serif; letter-spacing: 0; text-align: left;
+  box-shadow: 0 0 0 1px #3a3d47, 0 50px 100px -30px rgb(0 0 0 / .95); user-select: none; }
+.stream-ic { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.stream-title { height: 30px; flex: none; display: flex; align-items: center; justify-content: space-between; padding-left: 12px; background: #000; color: #fff; }
+.stream-caption { display: flex; height: 100%; }
+.stream-caption i { position: relative; width: 46px; height: 100%; }
+.stream-caption i::before, .stream-caption i::after { content: ""; position: absolute; left: 50%; top: 50%; translate: -50% -50%; }
+.stream-min::before { width: 10px; height: 1px; background: #fff; }
+.stream-max::before { width: 9px; height: 9px; border: 1px solid #fff; border-radius: 1px; }
+.stream-close::before, .stream-close::after { width: 13px; height: 1px; background: #fff; rotate: 45deg; }
+.stream-close::after { rotate: -45deg; }
+.stream-menu { height: 22px; flex: none; display: flex; align-items: center; gap: 13px; padding-left: 8px; font-size: 12.5px; }
+.stream-menu span::first-letter { text-decoration: underline; text-underline-offset: 2px; }
+.stream-main { flex: 1; min-height: 0; display: grid; gap: 4px; padding: 4px;
+  grid-template-columns: 224px 1fr; grid-template-rows: 214px 1fr 18px 36px 176px;
+  grid-template-areas: 'scenes preview' 'sources preview' 'sources zoom' 'sources context' 'sources docks'; }
+.stream-dock { display: flex; flex-direction: column; min-height: 0; border-radius: 4px; background: #272a33; box-shadow: 0 0 0 1px #3c404d; overflow: hidden; }
+.stream-dock > header { height: 24px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 8px;
+  background: #3c404d; font-weight: 700; font-size: 12.5px; }
+.stream-dock > header .stream-ic { width: 12px; height: 12px; stroke-width: 1.2; }
+.stream-dock > footer { height: 30px; flex: none; display: flex; align-items: center; gap: 2px; padding: 0 4px; border-top: 1px solid #1d1f26; }
+.stream-dock > footer .stream-ic { width: 26px; height: 24px; padding: 5px 6px; border-radius: 3px; }
+.stream-dock > footer .stream-ic:nth-child(3) { margin: 0 6px; }
+.stream-dock--scenes { grid-area: scenes; }
+.stream-dock--sources { grid-area: sources; }
+.stream-list { flex: 1; margin: 0; padding: 2px; list-style: none; }
+.stream-list li { height: 28px; display: flex; align-items: center; gap: 7px; padding: 0 7px; border-radius: 2px; font-size: 12.5px; }
+.stream-list li.is-sel { background: #284cb8; box-shadow: inset 0 1px 0 #476bd7; }
+.stream-row-ic { margin-left: auto; display: flex; gap: 10px; }
+.stream-row-ic .stream-ic:last-child { color: #8b8e98; }
+/* the preview: the 1920 x 1080 canvas, the Browser source selected (OBS's red box and handles) */
+.stream-preview { grid-area: preview; display: grid; place-items: center; background: #13141a; min-height: 0; }
+.stream-canvas { position: relative; height: calc(100% - 10px); aspect-ratio: 16 / 9; overflow: visible; }
+.stream-canvas > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.stream-source { position: absolute; left: 0; right: 0; top: 63.5%; height: 29.63%; outline: 1px solid #f00; }
+.stream-source img { width: 100%; height: 100%; display: block; }
+.stream-handle { position: absolute; width: 7px; height: 7px; background: #f00; translate: -50% -50%; }
+.stream-handle--tl { left: 0; top: 0; } .stream-handle--tc { left: 50%; top: 0; } .stream-handle--tr { left: 100%; top: 0; }
+.stream-handle--ml { left: 0; top: 50%; } .stream-handle--mr { left: 100%; top: 50%; }
+.stream-handle--bl { left: 0; top: 100%; } .stream-handle--bc { left: 50%; top: 100%; } .stream-handle--br { left: 100%; top: 100%; }
+.stream-zoom { grid-area: zoom; display: flex; align-items: center; gap: 12px; padding-left: 8px; font-size: 10px; color: #c8cad0; }
+.stream-zoom-mode { margin-left: 8px; padding-left: 10px; border-left: 1px solid #3c404d; width: 130px; }
+.stream-zoom .stream-ic { width: 10px; height: 10px; }
+.stream-context { grid-area: context; display: flex; align-items: center; gap: 8px; padding: 0 6px 0 10px; border-radius: 4px; background: #272a33; font-size: 12.5px; }
+.stream-context-name { display: flex; align-items: center; gap: 7px; margin-right: auto; }
+.stream-btn { height: 26px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border-radius: 4px;
+  background: #3c404d; font-size: 12.5px; white-space: nowrap; }
+.stream-context .stream-btn { background: none; box-shadow: inset 0 0 0 1px #3c404d; color: #c8cad0; }
+.stream-docks { grid-area: docks; display: grid; grid-template-columns: 1fr 176px 204px; gap: 4px; min-height: 0; }
+/* the mixer, horizontal: name and dB, a stereo meter with its scale, the volume slider */
+.stream-mixer { flex: 1; padding: 6px 10px 0; background: #1d1f26; display: grid; align-content: start; gap: 6px; }
+.stream-ch-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+.stream-ch-head span:last-child { color: #a9acb5; }
+.stream-meter { position: relative; height: 22px; }
+.stream-meter-bar { position: relative; height: 4px; margin-bottom: 1px;
+  background: linear-gradient(90deg, #17641e 0 66.7%, #6e520d 66.7% 85%, #7d1224 85%); }
+.stream-meter-bar::after { content: ""; position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--lit)) 0 0);
+  background: linear-gradient(90deg, #37d247 0 66.7%, #e7af24 66.7% 85%, #e43c56 85%); }
+.stream-meter-scale { position: absolute; left: 0; right: 0; top: 11px; height: 10px; font-size: 8.5px; color: #8b8e98; }
+.stream-meter-scale span { position: absolute; translate: -50% 0; }
+.stream-meter-scale span:first-child { translate: 0 0; }
+.stream-meter-scale span:last-child { translate: -100% 0; }
+.stream-ch-ctl { display: flex; align-items: center; gap: 8px; margin-top: 2px; }
+.stream-slider { position: relative; flex: 1; height: 4px; border-radius: 2px; background: linear-gradient(90deg, #476bd7 var(--v), #5b5f6b var(--v)); }
+.stream-slider i { position: absolute; left: var(--v); top: 50%; translate: -50% -50%; width: 10px; height: 16px; border-radius: 3px; background: #fff; }
+.stream-ch-ctl .stream-ic { width: 15px; height: 15px; }
+.stream-trans { padding: 6px; display: grid; gap: 6px; }
+.stream-combo { height: 26px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px 0 8px; border-radius: 4px; background: #3c404d; }
+.stream-combo .stream-ic { width: 10px; height: 10px; }
+.stream-trans-tools { display: flex; justify-content: flex-end; gap: 4px; }
+.stream-trans-tools .stream-ic { width: 24px; height: 24px; padding: 5px; border-radius: 4px; background: #3c404d; }
+.stream-trans-dur { display: flex; align-items: center; gap: 8px; }
+.stream-trans-dur .stream-combo { flex: 1; }
+.stream-controls { padding: 5px 6px; display: grid; gap: 4px; }
+.stream-controls .stream-btn { height: 25px; }
+.stream-vcam { display: grid; grid-template-columns: 1fr 28px; gap: 4px; }
+.stream-vcam .stream-btn { padding: 0; }
+.stream-status { height: 22px; flex: none; display: flex; justify-content: flex-end; align-items: stretch; background: #272a33; border-top: 1px solid #3c404d;
+  font-size: 11.5px; color: #c8cad0; }
+.stream-status span { display: flex; align-items: center; gap: 5px; padding: 0 10px; border-left: 1px solid #3c404d; }
+.stream-status span:first-child { border-left: 0; }
+.stream-status .stream-ic { width: 13px; height: 13px; color: #8b8e98; }
 
-/* a status card: who, what, the cover, a line of the song, and how far in */
-.presence { width: min(100%, 640px); border-radius: 20px; padding: 28px; font-size: 1.15rem; background: #15161d;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 50px 100px -35px rgb(0 0 0 / .95), 0 0 90px -30px rgb(171 156 255 / .35); }
-.presence-head { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid rgb(255 255 255 / .08); }
-.presence-head b { display: block; font-size: 1.35rem; }
-.presence-head small { color: #8fe0a8; font-size: 1rem; font-weight: 600; }
-.presence-avatar { position: relative; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem;
-  background: linear-gradient(135deg, #ab9cff, #4fe3cf); color: #0b0c12; }
-.presence-avatar i { position: absolute; right: -1px; bottom: -1px; width: 15px; height: 15px; border-radius: 50%; background: #3ba55d; box-shadow: 0 0 0 3px #15161d; }
-.presence-body { display: flex; gap: 18px; padding-top: 18px; }
-.presence-body img { width: 150px; height: 150px; border-radius: 10px; object-fit: cover; flex: none; }
-.presence-text { min-width: 0; flex: 1; display: grid; align-content: start; gap: 3px; }
-.presence-text b { font-size: 1.4rem; }
-.presence-text span { color: var(--mute); font-size: 1.05rem; }
-.presence-text em { color: #c9bfff; font-size: 1.05rem; margin-top: 6px; }
-.presence-bar { margin-top: 12px; height: 4px; border-radius: 4px; background: rgb(255 255 255 / .12); overflow: hidden; }
-.presence-bar i { display: block; width: 34%; height: 100%; background: #fff; border-radius: 4px; }
-.presence-times { display: flex; justify-content: space-between; color: var(--dim); font-size: .9rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+/* Discord's profile popout, dark theme, drawn at its real 300 px width and zoomed to fit (useFit) */
+.presence { position: relative; flex: none; width: 300px; border-radius: 8px; overflow: visible; background: #232428; color: #f2f3f5; text-align: left;
+  font: 400 14px/1.29 'gg sans', 'Inter Variable', 'Noto Sans', 'Segoe UI', sans-serif;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .06), 0 8px 16px rgb(0 0 0 / .24), 0 30px 70px -20px rgb(0 0 0 / .85); }
+.presence-banner { height: 105px; border-radius: 8px 8px 0 0; background: #6f5642; }
+.presence-avatar { position: absolute; left: 10px; top: 53px; width: 92px; height: 92px; border-radius: 50%; padding: 6px; background: #232428; }
+.presence-avatar img { width: 80px; height: 80px; border-radius: 50%; display: block; object-fit: cover; }
+.presence-avatar i { position: absolute; right: 2px; bottom: 2px; width: 28px; height: 28px; border-radius: 50%; background: #23a55a; border: 6px solid #232428; }
+.presence-body { padding: 48px 16px 16px; }
+.presence-name b { display: block; font-size: 20px; line-height: 24px; font-weight: 700; color: #f2f3f5; }
+.presence-name span { display: block; font-size: 14px; line-height: 18px; color: #dbdee1; margin-top: 2px; }
+.presence-card { margin-top: 14px; padding: 12px; border-radius: 8px; background: #19191b; }
+.presence-head { font-size: 12px; line-height: 16px; font-weight: 700; color: #f2f3f5; margin-bottom: 10px; }
+.presence-row { display: flex; gap: 10px; align-items: center; }
+.presence-art { position: relative; flex: none; width: 64px; height: 64px; }
+.presence-art > img:first-child { width: 64px; height: 64px; border-radius: 8px; display: block; object-fit: cover; }
+.presence-small { position: absolute; right: -4px; bottom: -4px; width: 26px; height: 26px; border-radius: 50%; border: 3px solid #000; background: #000; object-fit: cover; }
+/* the small image's hover text: the line being sung */
+.presence-tip { position: absolute; left: calc(100% - 4px - 13px); top: calc(100% + 13px); translate: -50% 0; padding: 8px 12px; border-radius: 8px; white-space: nowrap;
+  background: #111214; color: #dbdee1; font-size: 14px; line-height: 18px; font-weight: 500; z-index: 2; box-shadow: 0 8px 16px rgb(0 0 0 / .24); }
+.presence-tip::before { content: ""; position: absolute; left: 50%; top: -5px; translate: -50% 0; border: 5px solid transparent; border-top: 0; border-bottom-color: #111214; }
+.presence-meta { min-width: 0; flex: 1; display: grid; }
+.presence-meta b { font-size: 14px; line-height: 18px; font-weight: 600; color: #fcfcfc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.presence-meta > span { font-size: 12px; line-height: 16px; color: #dbdee1; margin-top: 1px; }
+.presence-progress { display: flex; align-items: center; gap: 8px; margin-top: 6px; font: 400 12px/16px 'gg mono', Consolas, 'Cascadia Mono', ui-monospace, monospace; color: #dbdee1; }
+.presence-cursor { position: absolute; left: calc(100% - 10px); top: calc(100% - 12px); width: 13px; height: 20px; z-index: 3; overflow: visible;
+  fill: #fff; stroke: #000; stroke-width: 1; stroke-linejoin: round; filter: drop-shadow(0 1px 1px rgb(0 0 0 / .4)); }
+.presence-progress i { flex: 1; height: 2px; border-radius: 1px; background: linear-gradient(90deg, #fcfcfc var(--p), #6f7077 var(--p)); }
 
 @media (max-width: 860px) {
-  .share-grid { grid-template-columns: 1fr; }
+  .share-grid { grid-template-columns: minmax(0, 1fr); }
   .share-vis { height: 440px; }
+  .share-vis--stream { height: auto; aspect-ratio: 1040 / 700; }
 }

@@ -499,10 +499,62 @@ function Styles() {
   )
 }
 
+// The share previews are drawn at their real size in px (an OBS window, a Discord popout) and
+// zoomed to fit their box, so their type and spacing keep the real proportions at any width.
+function useFit(ref, fill = 1) {
+  useEffect(() => {
+    const el = ref.current, box = el && el.parentElement
+    if (!box) return
+    const fit = () => {
+      const z = parseFloat(el.style.zoom) || 1, r = el.getBoundingClientRect()
+      const w = r.width / z, h = r.height / z
+      if (w && h) el.style.zoom = String(Math.min(box.clientWidth / w, box.clientHeight / h) * fill)
+    }
+    const ro = new ResizeObserver(fit)
+    ro.observe(box)
+    return () => ro.disconnect()
+  }, [ref, fill])
+}
+
+// Small line icons for the OBS window (16 px grid, drawn like OBS's own).
+const OBS_ICONS = {
+  plus: <path d="M8 3v10M3 8h10" />,
+  trash: <><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" /><path d="M7 7v4M9 7v4" /></>,
+  filter: <><rect x="3" y="3" width="10" height="10" rx="1" /><path d="M8 3v10" /><path d="M3.5 5h4M3.5 7.5h4M3.5 10h4" /></>,
+  up: <path d="M4 10l4-4 4 4" />,
+  down: <path d="M4 6l4 4 4-4" />,
+  gear: <><circle cx="8" cy="8" r="2" /><path d="M8 2v2M8 12v2M2 8h2M12 8h2M3.8 3.8l1.4 1.4M10.8 10.8l1.4 1.4M3.8 12.2l1.4-1.4M10.8 5.2l1.4-1.4" /></>,
+  eye: <><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" /><circle cx="8" cy="8" r="2" fill="currentColor" /></>,
+  lock: <><rect x="4" y="7" width="8" height="6.5" rx="1" fill="currentColor" stroke="none" /><path d="M5.5 7V5.3a2.5 2.5 0 0 1 5 0" /></>,
+  globe: <><circle cx="8" cy="8" r="5.8" /><path d="M2.2 8h11.6M8 2.2c-2.2 2.6-2.2 9 0 11.6M8 2.2c2.2 2.6 2.2 9 0 11.6" /></>,
+  image: <><rect x="2.5" y="3" width="11" height="10" rx="1" /><path d="M2.5 11l3.5-3.5 3 3 1.8-1.8 2.7 2.7" /><circle cx="10.5" cy="5.8" r="1" fill="currentColor" stroke="none" /></>,
+  speaker: <><path d="M2.5 6.2h2.3L8 3.5v9L4.8 9.8H2.5z" fill="currentColor" /><path d="M10.2 5.6a3.2 3.2 0 0 1 0 4.8M11.8 4a5.5 5.5 0 0 1 0 8" /></>,
+  dots: <><circle cx="8" cy="3.5" r="1.1" fill="currentColor" stroke="none" /><circle cx="8" cy="8" r="1.1" fill="currentColor" stroke="none" /><circle cx="8" cy="12.5" r="1.1" fill="currentColor" stroke="none" /></>,
+  caret: <path d="M4 6h8l-4 4.5z" fill="currentColor" stroke="none" />,
+  undock: <><rect x="2.5" y="2.5" width="7" height="6" /><path d="M6.5 8.5v5h7v-6h-4" /></>,
+  bars: <><path d="M3 13v-2M6 13V9M9 13V7M12 13V4" /></>,
+  rec: <><circle cx="8" cy="8" r="4.2" fill="currentColor" stroke="none" /></>,
+  live: <><circle cx="8" cy="8" r="1.6" fill="currentColor" stroke="none" /><path d="M5.2 5.2a4 4 0 0 0 0 5.6M10.8 5.2a4 4 0 0 1 0 5.6" /></>,
+}
+const Ic = ({ n }) => <svg className="stream-ic" viewBox="0 0 16 16" aria-hidden="true">{OBS_ICONS[n]}</svg>
+
+// The audio meter in OBS's horizontal mixer: green to -20 dB, yellow to -9, red to 0; lit up to `level` dB.
+function ObsMeter({ level }) {
+  const at = db => `${((db + 60) / 60) * 100}%`
+  return (
+    <div className="stream-meter">
+      {[0, 1].map(ch => <div key={ch} className="stream-meter-bar" style={{ '--lit': at(level - ch * 1.6) }} />)}
+      <div className="stream-meter-scale">{[-60, -50, -40, -30, -20, -10, 0].map(d => <span key={d} style={{ left: at(d) }}>{d}</span>)}</div>
+    </div>
+  )
+}
+
 // Beyond the PC's own screens: a phone, a post, a stream, a status. Each shown large and plain,
 // with what the app really makes (the phone's screen, saved cards, the overlay's own line).
 function Share() {
-  const root = useRef(null)
+  const root = useRef(null), obs = useRef(null), dc = useRef(null)
+  useFit(obs)
+  useFit(dc, 0.94)
   useGSAP(() => {
     if (reduceMotion()) return
     gsap.from('.share-item', { opacity: 0, y: 60, duration: 1.1, ease: 'expo.out', stagger: 0.1,
@@ -547,46 +599,110 @@ function Share() {
             <p>Press Ctrl+Alt+S to save the moment as a card or a 10-second clip, ready for your story.</p>
           </article>
           <article className="share-item">
-            <div className="share-vis">
-              <div className="stream">
-                <svg className="stream-scene" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-                  <defs>
-                    <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1b1440" /><stop offset=".55" stopColor="#5b2a63" /><stop offset="1" stopColor="#e0755a" /></linearGradient>
-                    <radialGradient id="sunG" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#ffd8a8" /><stop offset="1" stopColor="#ffb07a" stopOpacity="0" /></radialGradient>
-                  </defs>
-                  <rect width="160" height="90" fill="url(#skyG)" />
-                  <circle cx="104" cy="52" r="20" fill="url(#sunG)" />
-                  <path d="M0 62 L18 48 L30 56 L48 38 L66 54 L80 44 L98 58 L118 40 L136 54 L160 44 L160 90 L0 90 Z" fill="#2a1638" />
-                  <path d="M0 72 L22 60 L40 68 L62 56 L84 70 L106 60 L128 70 L146 62 L160 68 L160 90 L0 90 Z" fill="#160c22" />
-                  <path d="M0 82 L30 74 L60 80 L96 72 L130 80 L160 76 L160 90 L0 90 Z" fill="#0b0612" />
-                </svg>
-                <span className="stream-live"><i />Live</span>
-                <div className="stream-chat" aria-hidden="true">
-                  <p><b style={{ color: '#9be7ff' }}>nova</b> this song!!</p>
-                  <p><b style={{ color: '#ffb3d1' }}>kei</b> what overlay is that</p>
-                  <p><b style={{ color: '#c9b8ff' }}>mars</b> lyrics on stream 🔥</p>
+            <div className="share-vis share-vis--stream">
+              {/* OBS Studio's own window and dark theme; the canvas holds a photo and Starlit's real overlay */}
+              <div className="stream" ref={obs} role="img" aria-label="OBS Studio with Starlit's lyric line as a Browser source over the stream">
+                <div className="stream-title">
+                  <span>OBS 32.1.1 - Profile: Untitled - Scenes: Untitled</span>
+                  <span className="stream-caption"><i className="stream-min" /><i className="stream-max" /><i className="stream-close" /></span>
                 </div>
-                <img className="stream-overlay" src="/media/share/obs.webp" alt="The lyric overlay on a stream" loading="lazy" />
+                <div className="stream-menu">{['File', 'Edit', 'View', 'Docks', 'Profile', 'Scene Collection', 'Tools', 'Help'].map(m => <span key={m}>{m}</span>)}</div>
+                <div className="stream-main">
+                  <div className="stream-dock stream-dock--scenes">
+                    <header>Scenes<Ic n="undock" /></header>
+                    <ul className="stream-list">
+                      <li className="is-sel">Music</li><li>Just Chatting</li><li>Starting Soon</li><li>Be Right Back</li>
+                    </ul>
+                    <footer><Ic n="plus" /><Ic n="trash" /><Ic n="filter" /><Ic n="up" /><Ic n="down" /></footer>
+                  </div>
+                  <div className="stream-dock stream-dock--sources">
+                    <header>Sources<Ic n="undock" /></header>
+                    <ul className="stream-list">
+                      <li className="is-sel"><Ic n="globe" />Starlit lyrics<span className="stream-row-ic"><Ic n="eye" /><Ic n="lock" /></span></li>
+                      <li><Ic n="image" />Tokyo at night<span className="stream-row-ic"><Ic n="eye" /><Ic n="lock" /></span></li>
+                    </ul>
+                    <footer><Ic n="plus" /><Ic n="trash" /><Ic n="gear" /><Ic n="up" /><Ic n="down" /></footer>
+                  </div>
+                  <div className="stream-preview">
+                    <div className="stream-canvas">
+                      <img src="/media/share/stream-bg.webp" alt="" loading="lazy" />
+                      <div className="stream-source">
+                        <img src="/media/share/obs.webp" alt="" loading="lazy" />
+                        {['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'].map(h => <i key={h} className={`stream-handle stream-handle--${h}`} />)}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="stream-zoom"><span>−</span><span>34%</span><span>+</span><span className="stream-zoom-mode">Scale to Window</span><Ic n="caret" /></div>
+                  <div className="stream-context">
+                    <span className="stream-context-name"><Ic n="globe" />Starlit lyrics</span>
+                    <span className="stream-btn"><Ic n="gear" />Properties</span><span className="stream-btn"><Ic n="filter" />Filters</span><span className="stream-btn">Refresh</span>
+                  </div>
+                  <div className="stream-docks">
+                    <div className="stream-dock stream-dock--mixer">
+                      <header>Audio Mixer<Ic n="undock" /></header>
+                      <div className="stream-mixer">
+                        {[['Desktop Audio', '-3.2 dB', -9, 88], ['Mic/Aux', '0.0 dB', -46, 100]].map(([name, db, level, vol]) => (
+                          <div className="stream-ch" key={name}>
+                            <div className="stream-ch-head"><span>{name}</span><span>{db}</span></div>
+                            <ObsMeter level={level} />
+                            <div className="stream-ch-ctl"><span className="stream-slider" style={{ '--v': `${vol}%` }}><i /></span><Ic n="speaker" /><Ic n="dots" /></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="stream-dock stream-dock--trans">
+                      <header>Scene Transitions<Ic n="undock" /></header>
+                      <div className="stream-trans">
+                        <span className="stream-combo">Fade<Ic n="caret" /></span>
+                        <div className="stream-trans-tools"><Ic n="plus" /><Ic n="trash" /><Ic n="dots" /></div>
+                        <div className="stream-trans-dur"><span>Duration</span><span className="stream-combo">300 ms</span></div>
+                      </div>
+                    </div>
+                    <div className="stream-dock stream-dock--controls">
+                      <header>Controls<Ic n="undock" /></header>
+                      <div className="stream-controls">
+                        <span className="stream-btn">Start Streaming</span>
+                        <span className="stream-btn">Start Recording</span>
+                        <span className="stream-vcam"><span className="stream-btn">Start Virtual Camera</span><span className="stream-btn"><Ic n="gear" /></span></span>
+                        <span className="stream-btn">Studio Mode</span>
+                        <span className="stream-btn">Settings</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="stream-status">
+                  <span><Ic n="bars" /></span><span><Ic n="live" />00:00:00</span><span><Ic n="rec" />00:00:00</span><span>CPU: 1.9%</span><span>60.00 / 60.00 FPS</span>
+                </div>
               </div>
             </div>
             <h3>Lyrics on your stream</h3>
             <p>One link in OBS puts a clean, transparent lyric line over whatever you stream.</p>
           </article>
           <article className="share-item">
-            <div className="share-vis">
-              <div className="presence">
-                <div className="presence-head">
-                  <span className="presence-avatar">A<i /></span>
-                  <div><b>arnav</b><small>Listening to Starlit</small></div>
-                </div>
+            <div className="share-vis share-vis--presence">
+              {/* Discord's profile popout as it shows what Starlit sends (lib/discord.js): a "Listening"
+                  activity named after the app, details = title, state = "by <artist>", the cover as the
+                  large image, Starlit as the small one with the sung line as its hover text, start/end times */}
+              <div className="presence" ref={dc} role="img" aria-label="A Discord profile: Listening to Starlit, Slow Satellites by Ivo Marin, 1:14 of 3:36">
+                <div className="presence-banner" />
+                <div className="presence-avatar"><img src="/media/share/avatar.webp" alt="" /><i /></div>
                 <div className="presence-body">
-                  <img src="/media/covers/a.webp" alt="" />
-                  <div className="presence-text">
-                    <b>Slow Satellites</b>
-                    <span>by Ivo Marin</span>
-                    <em>“Turning in the dark”</em>
-                    <div className="presence-bar"><i /></div>
-                    <div className="presence-times"><span>1:14</span><span>3:36</span></div>
+                  <div className="presence-name"><b>Mira</b><span>mira.wav</span></div>
+                  <div className="presence-card">
+                    <div className="presence-head">Listening to Starlit</div>
+                    <div className="presence-row">
+                      <div className="presence-art">
+                        <img src="/media/covers/a.webp" alt="" />
+                        <img className="presence-small" src="/icon-512.png" alt="" />
+                        <span className="presence-tip">“Carry us tonight”</span>
+                        <svg className="presence-cursor" viewBox="0 0 13 20" aria-hidden="true"><path d="M1 1v15.5l3.8-3.6 2.6 6 2.4-1-2.5-5.9h5.3z" /></svg>
+                      </div>
+                      <div className="presence-meta">
+                        <b>Slow Satellites</b>
+                        <span>by Ivo Marin</span>
+                        <div className="presence-progress"><span>01:14</span><i style={{ '--p': '34%' }} /><span>03:36</span></div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
