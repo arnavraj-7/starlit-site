@@ -20,7 +20,7 @@ const Laptop3D = lazy(() => import('./Laptop3D.jsx'))
 gsap.registerPlugin(ScrollTrigger, useGSAP)
 
 // Swap for the real installer link once it's published.
-const DOWNLOAD_URL = '#download'
+const DOWNLOAD_URL = 'https://github.com/arnavraj-7/starlit/releases/latest/download/Starlit-Setup.exe'
 
 // Album colours from the three demo covers; sections hand the page one of these as it scrolls.
 const ACCENT = { violet: '#ab9cff', amber: '#ffaa6a', teal: '#4fe3cf' }
