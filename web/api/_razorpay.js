@@ -67,7 +67,8 @@ export class Rejected extends Error {}
 // Looks a payment up on Razorpay and decides whether it bought Starlit: the right order, a
 // Starlit order at today's price, paid in full, not refunded. Captures it if it was only
 // authorised. Returns the licence identity, which comes only from Razorpay's records.
-export async function paidStarlit(cfg, { paymentId, orderId, email }) {
+// anyPrice (a lost key): bought at whatever the price was then, still paid in full.
+export async function paidStarlit(cfg, { paymentId, orderId, email, anyPrice = false }) {
   const get = async path => {
     try { return await rzp(cfg, 'GET', path) } catch (e) {
       // a 4xx here means no such payment/order for this account: the caller's input was wrong
@@ -80,8 +81,10 @@ export async function paidStarlit(cfg, { paymentId, orderId, email }) {
   if (!p.order_id || (orderId && p.order_id !== orderId)) throw new Rejected(`payment ${paymentId} belongs to order ${p.order_id}`)
   const order = await get(`/orders/${p.order_id}`)
   if (!order || order.notes?.product !== 'starlit') throw new Rejected(`order ${p.order_id} is not a Starlit order`)
-  if (order.amount !== cfg.price || order.currency !== cfg.currency) throw new Rejected(`order ${order.id} is ${order.amount} ${order.currency}`)
-  if (p.amount !== cfg.price || p.currency !== cfg.currency) throw new Rejected(`payment ${paymentId} is ${p.amount} ${p.currency}`)
+  const want = anyPrice ? { amount: order.amount, currency: order.currency } : { amount: cfg.price, currency: cfg.currency }
+  if (!Number.isInteger(want.amount) || want.amount < 100) throw new Rejected(`order ${order.id} has no real price`)
+  if (order.amount !== want.amount || order.currency !== want.currency) throw new Rejected(`order ${order.id} is ${order.amount} ${order.currency}`)
+  if (p.amount !== want.amount || p.currency !== want.currency) throw new Rejected(`payment ${paymentId} is ${p.amount} ${p.currency}`)
   if (p.amount_refunded > 0 || p.refund_status) throw new Rejected(`payment ${paymentId} was refunded`)
   const buyer = String(order.notes?.email || p.email || '').trim().toLowerCase()
   if (!buyer) throw new Rejected(`no email on order ${order.id}`)

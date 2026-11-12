@@ -234,6 +234,15 @@ test('recover: payment id + the buyer email gives the same identity again', asyn
   assert.equal(p.id, PAY); assert.equal(p.e, 'buyer@example.com')
 })
 
+test('recover: a key bought before a price change still comes back; a part payment does not', quiet(async () => {
+  razorpayHas({ payment: paymentEntity({ amount: 49900 }), ord: orderEntity({ amount: 49900 }) })
+  const r = await call(recover, req({ paymentId: PAY, email: 'buyer@example.com' }))
+  assert.equal(r.status, 200)
+  assert.equal(checkKey(r.data.key).id, PAY)
+  razorpayHas({ payment: paymentEntity({ amount: 100 }), ord: orderEntity({ amount: 49900 }) })
+  assert.equal((await call(recover, req({ paymentId: PAY, email: 'buyer@example.com' }))).status, 400)
+}))
+
 test('recover: every miss gets the same answer', quiet(async () => {
   const answers = new Set()
   const tries = [
