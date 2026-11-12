@@ -515,32 +515,69 @@ main { position: relative; z-index: 1; }
 /* the headline just rises in, plain white: no dim copy underneath */
 .hero h1.sung .ww::before { display: none; }
 
-/* ---------- take it off the screen: phone, cards, stream ---------- */
-.share-sec { position: relative; }
-.share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(28px, 4vw, 80px); margin-top: clamp(40px, 6vh, 80px); align-items: start; }
-.share-item h3 { margin: 28px 0 8px; font-size: var(--fs-h3); font-weight: 800; letter-spacing: -.02em; }
-.share-item p { margin: 0; color: var(--mute); max-width: 34ch; line-height: 1.5; }
-.share-vis { height: clamp(320px, 46vh, 560px); display: grid; place-items: end center; position: relative; }
-/* a plain phone: rounded glass, thin bezel, the real screen inside */
-.share-phone { position: absolute; bottom: 0; left: 50%; translate: -50% 0; height: 100%; aspect-ratio: 9 / 18.2; border-radius: clamp(26px, 2.4vw, 44px); padding: clamp(6px, .5vw, 9px); background: #0d0f16;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .12), inset 0 1px 0 rgb(255 255 255 / .1), 0 50px 100px -30px rgb(0 0 0 / .9); }
-.share-phone img { position: absolute; inset: clamp(6px, .5vw, 9px); width: calc(100% - 2 * clamp(6px, .5vw, 9px)); height: calc(100% - 2 * clamp(6px, .5vw, 9px)); object-fit: cover; object-position: top; border-radius: calc(clamp(26px, 2.4vw, 44px) - 7px); display: block; }
-/* saved cards, fanned like a hand; they spread a little more when pointed at */
-.share-cards img { position: absolute; bottom: 0; left: 50%; height: 92%; aspect-ratio: 9 / 16; border-radius: 14px; object-fit: cover;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 80px -30px rgb(0 0 0 / .9); transition: transform .7s var(--ease); transform-origin: 50% 100%; }
-.share-cards img:nth-child(1) { transform: translateX(-84%) rotate(-9deg); }
-.share-cards img:nth-child(2) { transform: translateX(-16%) rotate(9deg); }
+
+/* ---------- take it off the screen: a 2x2 of big, plain previews ---------- */
+.share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(48px, 6vw, 120px) clamp(32px, 5vw, 110px); margin-top: clamp(40px, 6vh, 80px); align-items: start; }
+.share-vis { height: clamp(380px, 52vh, 620px); display: grid; place-items: center; position: relative; }
+.share-item h3 { margin: 30px 0 8px; font-size: clamp(1.5rem, 1.7vw, 2.5rem); font-weight: 800; letter-spacing: -.025em; }
+.share-item p { margin: 0; color: var(--mute); max-width: 40ch; line-height: 1.5; font-size: var(--fs-lead); }
+
+/* a phone: titanium edge, black bezel, an island cut-out, side buttons */
+.phone { position: absolute; top: 2%; left: 50%; translate: -50% 0; height: 96%; aspect-ratio: 9 / 19.3; border-radius: 15% / 7.2%; padding: 3.2%;
+  background: linear-gradient(145deg, #4a4d58, #1b1d24 30%, #2c2f39 70%, #565a66);
+  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .18), inset 0 0 0 4px #0b0c10, 0 60px 120px -40px rgb(0 0 0 / .95), 0 0 80px -20px rgb(255 160 90 / .25); }
+.phone-screen { position: relative; width: 100%; height: 100%; border-radius: 12.5% / 5.9%; overflow: hidden; background: #000; box-shadow: 0 0 0 2px #050507; }
+.phone-screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.phone-island { position: absolute; top: 2.2%; left: 50%; translate: -50% 0; width: 31%; height: 3.6%; border-radius: 999px; background: #000;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .04); }
+.phone-btn { position: absolute; width: 3px; border-radius: 2px; background: linear-gradient(90deg, #5d616e, #2a2c34); }
+.phone-btn--a { left: -3px; top: 17%; height: 5%; }
+.phone-btn--b { left: -3px; top: 25%; height: 9%; }
+.phone-btn--c { right: -3px; top: 22%; height: 13%; }
+
+/* saved cards, fanned; they spread when pointed at */
+.share-cards img { position: absolute; bottom: 4%; left: 50%; height: 90%; aspect-ratio: 9 / 16; border-radius: 16px; object-fit: cover;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 40px 90px -30px rgb(0 0 0 / .95); transition: transform .7s var(--ease); transform-origin: 50% 100%; }
+.share-cards img:nth-child(1) { transform: translateX(-88%) rotate(-10deg); }
+.share-cards img:nth-child(2) { transform: translateX(-12%) rotate(10deg); }
 .share-cards img:nth-child(3) { transform: translateX(-50%); }
-.share-cards:hover img:nth-child(1) { transform: translateX(-96%) rotate(-13deg); }
-.share-cards:hover img:nth-child(2) { transform: translateX(-4%) rotate(13deg); }
+.share-cards:hover img:nth-child(1) { transform: translateX(-104%) rotate(-14deg); }
+.share-cards:hover img:nth-child(2) { transform: translateX(4%) rotate(14deg); }
 .share-cards:hover img:nth-child(3) { transform: translate(-50%, -4%); }
-/* the overlay as a stream would show it: over a dark scene, lower third */
-.share-stream { width: 100%; aspect-ratio: 16 / 10; border-radius: 14px; overflow: hidden; display: grid; place-items: end center; padding-bottom: 12%;
-  background: radial-gradient(80% 70% at 30% 30%, #2a3354, transparent 70%), radial-gradient(70% 60% at 80% 80%, #3d2a30, transparent 70%), #0e1018;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 40px 80px -30px rgb(0 0 0 / .9); }
-.share-stream img { width: 86%; }
-.share-foot { margin: clamp(40px, 6vh, 70px) 0 0; color: var(--dim); font-size: var(--fs-lead); }
+
+/* a stream: a game scene, the live badge, chat, and Starlit's line across the lower third */
+.stream { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .12), 0 50px 100px -35px rgb(0 0 0 / .95); }
+.stream-scene { position: absolute; inset: 0; width: 100%; height: 100%; }
+.stream-live { position: absolute; top: 5%; left: 4%; display: inline-flex; align-items: center; gap: .45em; padding: .35em .75em; border-radius: 6px;
+  font: 800 clamp(.65rem, .7vw, .95rem)/1 Inter, sans-serif; letter-spacing: .08em; text-transform: uppercase; color: #fff; background: #e5484d; }
+.stream-live i { width: .5em; height: .5em; border-radius: 50%; background: #fff; }
+.stream-chat { position: absolute; top: 5%; right: 3.5%; width: 27%; display: grid; gap: .35em; padding: .7em .8em; border-radius: 8px;
+  background: rgb(10 8 18 / .62); font: 500 clamp(.62rem, .55vw, .82rem)/1.35 Inter, sans-serif; color: rgb(255 255 255 / .85); }
+.stream-chat p { margin: 0; font-size: inherit; line-height: inherit; color: inherit; max-width: none; }   /* not the captions' paragraph style */
+.stream-chat b { margin-right: .4em; }
+.stream-overlay { position: absolute; left: 50%; bottom: 6%; translate: -50% 0; width: 78%; filter: drop-shadow(0 4px 18px rgb(0 0 0 / .55)); }
+
+/* a status card: who, what, the cover, a line of the song, and how far in */
+.presence { width: min(100%, 640px); border-radius: 20px; padding: 28px; font-size: 1.15rem; background: #15161d;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 50px 100px -35px rgb(0 0 0 / .95), 0 0 90px -30px rgb(171 156 255 / .35); }
+.presence-head { display: flex; align-items: center; gap: 14px; padding-bottom: 16px; border-bottom: 1px solid rgb(255 255 255 / .08); }
+.presence-head b { display: block; font-size: 1.35rem; }
+.presence-head small { color: #8fe0a8; font-size: 1rem; font-weight: 600; }
+.presence-avatar { position: relative; width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 1.3rem;
+  background: linear-gradient(135deg, #ab9cff, #4fe3cf); color: #0b0c12; }
+.presence-avatar i { position: absolute; right: -1px; bottom: -1px; width: 15px; height: 15px; border-radius: 50%; background: #3ba55d; box-shadow: 0 0 0 3px #15161d; }
+.presence-body { display: flex; gap: 18px; padding-top: 18px; }
+.presence-body img { width: 150px; height: 150px; border-radius: 10px; object-fit: cover; flex: none; }
+.presence-text { min-width: 0; flex: 1; display: grid; align-content: start; gap: 3px; }
+.presence-text b { font-size: 1.4rem; }
+.presence-text span { color: var(--mute); font-size: 1.05rem; }
+.presence-text em { color: #c9bfff; font-size: 1.05rem; margin-top: 6px; }
+.presence-bar { margin-top: 12px; height: 4px; border-radius: 4px; background: rgb(255 255 255 / .12); overflow: hidden; }
+.presence-bar i { display: block; width: 34%; height: 100%; background: #fff; border-radius: 4px; }
+.presence-times { display: flex; justify-content: space-between; color: var(--dim); font-size: .9rem; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
 @media (max-width: 860px) {
-  .share-grid { grid-template-columns: 1fr; gap: 64px; }
-  .share-vis { height: 420px; }
+  .share-grid { grid-template-columns: 1fr; }
+  .share-vis { height: 440px; }
 }

@@ -468,13 +468,13 @@ function Styles() {
   )
 }
 
-// Beyond the PC's own screens: a phone, a post, a stream. Each shown with what the app really
-// makes (a phone running it, saved cards, the OBS overlay).
+// Beyond the PC's own screens: a phone, a post, a stream, a status. Each shown large and plain,
+// with what the app really makes (the phone's screen, saved cards, the overlay's own line).
 function Share() {
   const root = useRef(null)
   useGSAP(() => {
     if (reduceMotion()) return
-    gsap.from('.share-item', { opacity: 0, y: 60, duration: 1.1, ease: 'expo.out', stagger: 0.12,
+    gsap.from('.share-item', { opacity: 0, y: 60, duration: 1.1, ease: 'expo.out', stagger: 0.1,
       scrollTrigger: { trigger: '.share-grid', start: 'top 80%' } })
   }, { scope: root })
   return (
@@ -483,7 +483,12 @@ function Share() {
         <Sung as="h2" className="h2 sung-scroll" text="Take it off the screen." />
         <div className="share-grid">
           <article className="share-item">
-            <div className="share-vis"><div className="share-phone"><img src="/media/share/phone.webp" alt="Starlit running on a phone" loading="lazy" /></div></div>
+            <div className="share-vis share-vis--phone">
+              <div className="phone">
+                <i className="phone-btn phone-btn--a" /><i className="phone-btn phone-btn--b" /><i className="phone-btn phone-btn--c" />
+                <div className="phone-screen"><img src="/media/share/phone.webp" alt="Starlit running on a phone" loading="lazy" /><i className="phone-island" /></div>
+              </div>
+            </div>
             <h3>Your phone is a screen too</h3>
             <p>Scan the code in Settings and any phone or tablet on your Wi-Fi shows the lyrics. Nothing to install.</p>
           </article>
@@ -497,12 +502,54 @@ function Share() {
             <p>Press Ctrl+Alt+S to save the moment as a card or a 10-second clip, ready for your story.</p>
           </article>
           <article className="share-item">
-            <div className="share-vis"><div className="share-stream"><img src="/media/share/obs.webp" alt="The OBS lyric overlay" loading="lazy" /></div></div>
+            <div className="share-vis">
+              <div className="stream">
+                <svg className="stream-scene" viewBox="0 0 160 90" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1b1440" /><stop offset=".55" stopColor="#5b2a63" /><stop offset="1" stopColor="#e0755a" /></linearGradient>
+                    <radialGradient id="sunG" cx=".5" cy=".5" r=".5"><stop offset="0" stopColor="#ffd8a8" /><stop offset="1" stopColor="#ffb07a" stopOpacity="0" /></radialGradient>
+                  </defs>
+                  <rect width="160" height="90" fill="url(#skyG)" />
+                  <circle cx="104" cy="52" r="20" fill="url(#sunG)" />
+                  <path d="M0 62 L18 48 L30 56 L48 38 L66 54 L80 44 L98 58 L118 40 L136 54 L160 44 L160 90 L0 90 Z" fill="#2a1638" />
+                  <path d="M0 72 L22 60 L40 68 L62 56 L84 70 L106 60 L128 70 L146 62 L160 68 L160 90 L0 90 Z" fill="#160c22" />
+                  <path d="M0 82 L30 74 L60 80 L96 72 L130 80 L160 76 L160 90 L0 90 Z" fill="#0b0612" />
+                </svg>
+                <span className="stream-live"><i />Live</span>
+                <div className="stream-chat" aria-hidden="true">
+                  <p><b style={{ color: '#9be7ff' }}>nova</b> this song!!</p>
+                  <p><b style={{ color: '#ffb3d1' }}>kei</b> what overlay is that</p>
+                  <p><b style={{ color: '#c9b8ff' }}>mars</b> lyrics on stream 🔥</p>
+                </div>
+                <img className="stream-overlay" src="/media/share/obs.webp" alt="The lyric overlay on a stream" loading="lazy" />
+              </div>
+            </div>
             <h3>Lyrics on your stream</h3>
             <p>One link in OBS puts a clean, transparent lyric line over whatever you stream.</p>
           </article>
+          <article className="share-item">
+            <div className="share-vis">
+              <div className="presence">
+                <div className="presence-head">
+                  <span className="presence-avatar">A<i /></span>
+                  <div><b>arnav</b><small>Listening to Starlit</small></div>
+                </div>
+                <div className="presence-body">
+                  <img src="/media/covers/a.webp" alt="" />
+                  <div className="presence-text">
+                    <b>Slow Satellites</b>
+                    <span>by Ivo Marin</span>
+                    <em>“Turning in the dark”</em>
+                    <div className="presence-bar"><i /></div>
+                    <div className="presence-times"><span>1:14</span><span>3:36</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <h3>Show what you’re playing</h3>
+            <p>Your Discord status shows the song, its cover and a line of the lyrics as it plays.</p>
+          </article>
         </div>
-        <p className="share-foot">Your Discord status can show what you’re listening to, too.</p>
       </div>
     </section>
   )
