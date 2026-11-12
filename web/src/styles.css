@@ -387,7 +387,9 @@ main { position: relative; z-index: 1; }
 .groove-needle-light { --na: inherit; --nr: inherit; }
 .groove.is-lit .groove-needle-light { opacity: 1; }
 /* the record sits above the hero's layout box so its arm can be picked up; only the arm takes the pointer */
-.groove { z-index: 2; }
+/* the hero's text box covers the record, so it lets the pointer through except on the text itself */
+.hero > .wrap, .hero-row { pointer-events: none; }
+.hero-row > *, .hero .screen-wrap, .hero .masthead > * { pointer-events: auto; }
 .groove-arm { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .groove-arm .ga-arm { pointer-events: auto; cursor: grab; }
 .groove.is-lifted .ga-arm { cursor: grabbing; }
