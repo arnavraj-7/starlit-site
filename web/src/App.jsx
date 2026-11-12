@@ -201,51 +201,14 @@ function Hero() {
       .to(words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 0.5)
       .call(() => { v.play().catch(() => {}) }, null, 1.35)
       .from('.hero .mini', { opacity: 0.001, x: -30, y: 20, scale: 0.94, duration: 1.1, ease: 'expo.out' }, 1.45)
-    // Once in, the headline is sung the way the app sings a line: it waits dim, like the next
-    // lyric, and each word lights from left to right as it is sung, rises a hair and blooms, then
-    // settles; the line stays lit. Timed like singing it (Ev-ery word, / the mo-ment / it's sung).
-    // It sings again whenever the needle is put down on the record.
-    const wws = words.map(w => w.parentElement)
-    const TIMES = [0.46, 0.52, 0.2, 0.5, 0.22, 0.95]             // how long each word is held
-    const GAPS = [0, 0.04, 0.3, 0.03, 0.12, 0.05]                 // breath before it
-    const glow = a => `drop-shadow(0 0 ${(0.07 * a).toFixed(3)}em rgb(255 244 236 / ${(0.45 * a).toFixed(3)}))`   // a tight sheen on the letters, never a haze around the word
-    let sing = null
-    const singLine = (from = 0) => {
-      if (sing) sing.kill()
-      sing = gsap.timeline({ delay: from })
-      words.forEach((w, i) => {
-        const at = `>${GAPS[i] ? '+=' + GAPS[i] : ''}`
-        sing.addLabel(`w${i}`, i ? at : 0)
-          .to(w, { '--sungAt': '0%', duration: TIMES[i], ease: 'none' }, `w${i}`)
-          .fromTo(wws[i], { y: 0 }, { y: '-0.035em', duration: 0.35, ease: 'back.out(3)' }, `w${i}`)
-          .fromTo(wws[i], { filter: glow(0) }, { filter: glow(1), duration: 0.12, ease: 'power2.out' }, `w${i}`)
-          .to(wws[i], { filter: glow(0), duration: 0.9, ease: 'power2.out' }, `w${i}+=${TIMES[i]}`)
-          .to(wws[i], { y: 0, duration: 0.8, ease: 'power3.out' }, `w${i}+=${TIMES[i]}`)
-      })
-    }
-    const unsing = () => gsap.to(words, { '--sungAt': '100%', duration: 0.45, ease: 'power2.in', stagger: { each: 0.03, from: 'end' } })
-    const startSinging = () => { gsap.set('.hero h1 .wm', { overflow: 'visible' }); singLine(0.25) }   // room for the bloom
-    if (window.__introDone) startSinging(); else window.addEventListener('starlit:intro-done', startSinging, { once: true })
-    // the needle going down on the record plays the line again
+    // While the needle is on the record and the hero is in view, the page's own edge light runs
+    // round the visitor's browser window on the beat: Starlit's edge light, on their screen.
     const groove = document.querySelector('.groove')
-    let wasLit = groove ? groove.classList.contains('is-lit') : false
-    const mo = groove && new MutationObserver(() => {
-      const lit = groove.classList.contains('is-lit')
-      if (lit && !wasLit && window.__introDone) { unsing(); singLine(0.55) }
-      wasLit = lit
-    })
+    let heroIn = true
+    const sync = () => { window.__edgeHype = !!(heroIn && groove && groove.classList.contains('is-lit')) }
+    const mo = groove && new MutationObserver(sync)
     mo && mo.observe(groove, { attributes: true, attributeFilter: ['class'] })
-    // a word you point at blooms like the word being sung (the glow sits on the outer word: the
-    // inner one's mask would cut it off at its box)
-    const hovers = wws.map((ww, i) => {
-      const enter = () => {
-        gsap.fromTo(ww, { filter: glow(1) }, { filter: glow(0), duration: 1.1, ease: 'power2.out' })
-        gsap.fromTo(ww, { y: 0 }, { y: '-0.04em', duration: 0.5, ease: 'back.out(3)', overwrite: 'auto' })
-      }
-      const leave = () => gsap.to(ww, { y: 0, duration: 0.7, ease: 'power3.out', overwrite: 'auto' })
-      ww.addEventListener('pointerenter', enter); ww.addEventListener('pointerleave', leave)
-      return () => { ww.removeEventListener('pointerenter', enter); ww.removeEventListener('pointerleave', leave) }
-    })
+    ScrollTrigger.create({ trigger: root.current, start: 'top top', end: '70% top', onToggle: st => { heroIn = st.isActive; sync() } })
     // Scroll: the screen grows toward you, the headline drifts away.
     gsap.to('.hero .screen-wrap', { scale: 1.07, ease: 'none', force3D: true,
       scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 75%', end: 'bottom top', scrub: true } })
@@ -258,7 +221,7 @@ function Hero() {
     // The preview only plays while it's on screen.
     ScrollTrigger.create({ trigger: root.current, start: 'top top', end: 'bottom top',
       onLeave: () => v.pause(), onEnterBack: () => v.play().catch(() => {}) })
-    return () => { hovers.forEach(f => f()); mo && mo.disconnect(); window.removeEventListener('starlit:intro-done', startSinging) }
+    return () => { mo && mo.disconnect(); window.__edgeHype = false }
   }, { scope: root })
   return (
     <section className="hero" id="top" ref={root}>
@@ -272,11 +235,11 @@ function Hero() {
             <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
-                <a className="btn" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
+                <a className="btn btn--hero" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
                 <a className="link-down" href="#styles">See the styles <span aria-hidden="true">↓</span></a>
               </div>
             </ClickSpark>
-            <p className="fineprint">Free, for Windows 10 and 11. Works with Spotify, Apple Music, YouTube Music and local files.</p>
+            <p className="fineprint">Free · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
           </div>
         </div>
         <div className="screen-wrap">
