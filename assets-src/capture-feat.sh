@@ -13,14 +13,9 @@ const toData=async u=>{const b=await (await fetch(u)).blob();return await new Pr
 const swap=(art,title,artist,k)=>setTrack({...state.track,key:state.track.key+k,art,title,artist});"
 
 # 1. colours from the cover: the song changes to one with a teal cover, and everything follows
-[ -d raw/feat-colour/deck ] || ./capture.sh feat-colour deck flow a 30 8 "$H const C=await toData('$F/cover-c.png'); at(2.6,()=>swap(C,'Slow Satellites','Ivo Marin','c'));"
+./capture.sh feat-colour deck flow a 30 8 "$H const C=await toData('$F/cover-c.png'); at(2.6,()=>swap(C,'Slow Satellites','Ivo Marin','c'));"
 # 2. the edge light running round the screen
 ./capture.sh feat-edge deck pulse b 23 7 ""
-# 3. whatever you play: three songs in a row, the lyrics carry on
-./capture.sh feat-players deck flow b 40 9 "$H const B=await toData('$F/cover-a.png'),C=await toData('$F/cover-c.png'); at(2.8,()=>swap(B,'Paper Moons','Lio Arden','p')); at(5.8,()=>swap(C,'Static Rain','Mara Vey','s'));"
-# 4. two screens: the monitor's full lyrics and the laptop's one word, same moment
-./capture.sh feat-screens-deck deck flow a 22 7 ""
-./capture.sh feat-screens-stage stage pulse a 22 7 ""
-# 5. a game comes to the front: Starlit steps back
+# 3. a game comes to the front: Starlit steps back
 ./capture.sh feat-games deck flow b 30 7 "$H at(2.6,()=>applyPower({low:true,app:'VALORANT'}));"
 echo captured
