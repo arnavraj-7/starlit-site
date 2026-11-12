@@ -349,26 +349,43 @@ async function halftoneWord(cv, word) {
   x.fill()
 }
 
-// The three styles on a drum that turns with the scroll.
+// The app's window, shown once. It rises out of the hero and holds for a moment; then it steps
+// aside to the right and the drum of style names comes in beside it. Scrolling turns the drum and
+// the same window changes style in place: Flow, Constellation, Pulse.
+// Where each style rests in the pinned scroll (0 is the window's big moment).
+const HOLD = [0.33, 0.63, 0.95]
 function Styles() {
   const root = useRef(null)
   const frame = useRef(null)
+  const flow = useRef(null)
   const [active, setActive] = useState(0)
   const [onScreen, setOnScreen] = useState(false)
+  const [ready, setReady] = useState(false)
+  const readyRef = useRef(false)
   const videos = useRef([])
   const drumST = useRef(null)
   // a style name you click scrolls the drum round to it
   const goStyle = i => {
     const st = drumST.current
-    if (!st) { setActive(i); return }
-    const y = st.start + (st.end - st.start) * i / (STYLES.length - 1)
+    if (!st) { setActive(i); setAccent(STYLES[i].accent); return }
+    const y = st.start + (st.end - st.start) * HOLD[i]
     if (window.__lenis) window.__lenis.scrollTo(y, { duration: 1.1 }); else scrollTo({ top: y, behavior: 'smooth' })
   }
   useTilt(frame, 3)
   useEffect(() => { root.current.style.setProperty('--accent', STYLES[active].accent) }, [active])
+  // Nothing plays until the hero's entrance has finished. Before that, the Flow recording is
+  // started and stopped once while still hidden, so its decoder is ready.
   useEffect(() => {
+    const v = flow.current
+    if (v) v.play().then(() => { if (!readyRef.current) { v.pause(); v.currentTime = 0 } }).catch(() => {})
+    const go = () => { readyRef.current = true; setReady(true) }
+    if (window.__introDone) go(); else window.addEventListener('starlit:intro-done', go, { once: true })
+    return () => window.removeEventListener('starlit:intro-done', go)
+  }, [])
+  useEffect(() => {
+    if (!ready) return
     videos.current.forEach((v, i) => { if (!v) return; if (i === active && onScreen) v.play().catch(() => {}); else v.pause() })
-  }, [active, onScreen])
+  }, [active, onScreen, ready])
   useGSAP(() => {
     const items = gsap.utils.toArray('.drum-item')
     const step = 34, R = 260
@@ -381,13 +398,25 @@ function Styles() {
       })
     }
     place(0)
+    const pin = root.current.querySelector('.styles-pin'), win = root.current.querySelector('.stage-win')
+    const slot = root.current.querySelector('.stage-slot'), body = root.current.querySelector('.stage-rise')
+    // The window is laid out at its big size (so it stays sharp) and scaled down into the empty
+    // slot beside the drum; this is the move from its centre (the screen's) to the slot's.
+    const into = () => {
+      const p = pin.getBoundingClientRect(), s = slot.getBoundingClientRect()
+      return { x: s.left + s.width / 2 - p.left - p.width / 2, y: s.top + s.height / 2 - p.top - p.height / 2, scale: s.width / body.offsetWidth }
+    }
     const mm = gsap.matchMedia()
     mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
       const state = { p: 0 }
-      gsap.to(state, {
-        p: STYLES.length - 1, ease: 'none',
-        snap: { snapTo: 1 / (STYLES.length - 1), duration: { min: 0.25, max: 0.7 }, ease: 'power3.inOut' },
-        scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${STYLES.length * 70}%`, scrub: 0.5, pin: '.styles-pin', anticipatePin: 1, onRefresh: s => { drumST.current = s },
+      // 1. it rises out of the hero, standing up as it comes
+      gsap.fromTo('.stage-rise', { y: () => innerHeight * 0.08, scale: 0.86, rotationX: 16 }, { y: 0, scale: 1, rotationX: 0, ease: 'none', force3D: true,
+        scrollTrigger: { trigger: root.current, start: 'top bottom', end: 'top top', scrub: true } })
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=330%', scrub: 0.5, pin: '.styles-pin', anticipatePin: 1, invalidateOnRefresh: true,
+          snap: { snapTo: [0, ...HOLD, 1], duration: { min: 0.25, max: 0.8 }, ease: 'power3.inOut' },
+          onRefresh: s => { drumST.current = s },
           onEnter: () => setAccent(STYLES[0].accent), onEnterBack: () => setAccent(STYLES[Math.round(state.p)].accent) },
         onUpdate: () => {
           place(state.p)
@@ -395,6 +424,21 @@ function Styles() {
           setActive(prev => { if (prev !== i) setAccent(STYLES[i].accent); return i })
         },
       })
+      // 2. held big for a beat, then it steps aside and the drum comes in beside it
+      tl.to(win, { x: () => into().x, y: () => into().y, scale: () => into().scale, duration: 0.24, ease: 'power2.inOut' }, 0.06)
+        .to('.stage-win .mini', { autoAlpha: 0, y: 40, duration: 0.1 }, 0.06)
+        .fromTo('.styles-copy', { autoAlpha: 0, x: -70 }, { autoAlpha: 1, x: 0, duration: 0.11, ease: 'power2.out' }, 0.21)
+      // 3. the drum turns and the window changes style in place
+        .to(state, { p: 1, duration: 0.24 }, 0.36)
+        .to(state, { p: 2, duration: 0.24 }, 0.66)
+        .set({}, {}, 1)
+    })
+    mm.add('(min-width: 861px) and (prefers-reduced-motion: reduce)', () => {
+      // no scene: the window simply sits beside the list
+      const put = () => gsap.set(win, into())
+      gsap.set('.stage-win .mini', { autoAlpha: 0 })
+      put()
+      ScrollTrigger.create({ trigger: root.current, onRefresh: put })
     })
   }, { scope: root })
   useGSAP(() => {
@@ -402,40 +446,53 @@ function Styles() {
   }, { scope: root })
   const warmed = useRef(false)
   useEffect(() => {
-    if (!onScreen || warmed.current) return
+    if (!onScreen || !ready || warmed.current) return
     warmed.current = true
     const timers = videos.current.slice(1).map((v, k) => setTimeout(() => {
       if (!v || !v.paused || v.currentTime > 0) return
       v.play().then(() => { if (!v.classList.contains('is-on')) { v.pause(); v.currentTime = 0 } }).catch(() => {})
     }, 500 + k * 450))
     return () => timers.forEach(clearTimeout)
-  }, [onScreen])
+  }, [onScreen, ready])
   return (
     <section className="styles-sec" id="styles" ref={root}>
-      <div className="styles-pin wrap">
+      <div className="styles-pin">
         <StyleBackdrops active={STYLES[active].id} />
-        <div>
-          <div className="drum-wrap" aria-hidden="true">
-            <div className="drum">{STYLES.map((s, i) => <div className="drum-item" key={s.id} style={{ '--sc': s.accent }} onClick={() => goStyle(i)}>{s.name}</div>)}</div>
-          </div>
-          <div className="style-info">
-            {STYLES.map((s, i) => (
-              <div className={`info ${i === active ? 'is-on' : ''}`} key={s.id} onClick={() => { setActive(i); setAccent(s.accent) }}>
-                <h3 className="info-name">{s.name}</h3>
-                <p className="body">{s.text}</p>
+        <div className="stage-win">
+          <div className="stage-rise">
+            <div className="style-screen">
+              {STYLES.map((s, i) => <i key={s.id} className={`frame-glow ${i === active ? 'is-on' : ''}`} style={{ '--accent': s.accent }} aria-hidden="true" />)}
+              <div className="display-frame" ref={frame}>
+                <div className="sizer" />
+                {STYLES.map((s, i) => (
+                  <video key={s.id} ref={el => { videos.current[i] = el; if (i === 0) flow.current = el }} className={i === active ? 'is-on' : ''} src={s.video} poster={s.poster}
+                    muted loop playsInline preload={i === 0 ? 'auto' : 'metadata'}
+                    aria-label={i === 0 ? 'Starlit in the Flow style: the album on a turntable beside scrolling lyrics' : `The ${s.name} style`} />
+                ))}
+                {/* the turntable in the Flow recording, live: pausing really lifts the arm */}
+                <div className={`tt-live-wrap ${active === 0 ? 'is-on' : ''}`}>
+                  <TurntableLive video={flow} cover="/media/covers/a.webp" songStart={22} />
+                </div>
               </div>
-            ))}
+              <MiniPlayer video={flow} />
+            </div>
           </div>
         </div>
-        <div className="style-screen">
-          {STYLES.map((s, i) => <i key={s.id} className={`frame-glow ${i === active ? 'is-on' : ''}`} style={{ '--accent': s.accent }} aria-hidden="true" />)}
-          <div className="display-frame" ref={frame}>
-            <div className="sizer" />
-            {STYLES.map((s, i) => (
-              <video key={s.id} ref={el => (videos.current[i] = el)} className={i === active ? 'is-on' : ''} src={s.video} poster={s.poster}
-                muted loop playsInline preload="metadata" aria-label={`The ${s.name} style`} />
-            ))}
+        <div className="styles-grid wrap">
+          <div className="styles-copy">
+            <div className="drum-wrap" aria-hidden="true">
+              <div className="drum">{STYLES.map((s, i) => <div className="drum-item" key={s.id} style={{ '--sc': s.accent }} onClick={() => goStyle(i)}>{s.name}</div>)}</div>
+            </div>
+            <div className="style-info">
+              {STYLES.map((s, i) => (
+                <div className={`info ${i === active ? 'is-on' : ''}`} key={s.id} onClick={() => { setActive(i); setAccent(s.accent) }}>
+                  <h3 className="info-name">{s.name}</h3>
+                  <p className="body">{s.text}</p>
+                </div>
+              ))}
+            </div>
           </div>
+          <div className="stage-slot" aria-hidden="true"><i /></div>
         </div>
       </div>
     </section>

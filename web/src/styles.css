@@ -39,7 +39,7 @@
 .features, .setup-sec { --accent: #4fe3cf; }
 .styles-sec, .sc-colour { transition: --accent .8s var(--ease); }
 /* The colours derived from it are worked out again wherever it is set. */
-:root, .laptop-sec, .styles-sec, .tt-sec, .features, .setup-sec, .finale, .footer, .sc-colour, .frame-glow, .colour-wash i {
+:root, .laptop-sec, .styles-sec, .stage-win, .tt-sec, .features, .setup-sec, .finale, .footer, .sc-colour, .frame-glow, .colour-wash i {
   --glow: color-mix(in oklch, var(--accent) 55%, transparent);
   --wash: color-mix(in oklch, var(--accent) 14%, transparent);
 }
@@ -199,9 +199,28 @@ main { position: relative; z-index: 1; }
   .lw-word { font-size: 17vw; }
 }
 @media (prefers-reduced-motion: reduce) { .laptop-word { display: none; } .laptop-copy .step:first-child { opacity: 0; } .laptop-copy .step--side { opacity: 1; } }
-/* ---------- styles drum ---------- */
+/* ---------- styles: one window. It rises out of the hero, then steps aside for the drum ---------- */
 .styles-sec { position: relative; }
-.styles-pin { height: 100vh; display: grid; grid-template-columns: minmax(260px, .8fr) 1.6fr; align-items: center; gap: clamp(24px, 5vw, 80px); }
+.styles-pin { height: 100vh; }
+.styles-grid { height: 100%; display: grid; grid-template-columns: minmax(260px, .8fr) 1.6fr; align-items: center; gap: clamp(24px, 5vw, 80px); }
+.styles-copy { position: relative; z-index: 1; }
+/* where the window comes to rest; it is laid out big and scaled down into this box */
+.stage-slot { padding: clamp(5px, .6vw, 9px); visibility: hidden; }
+.stage-slot i { display: block; aspect-ratio: 16 / 9; }
+/* a screen-sized layer with the window in its centre: scaling the layer scales the window about its own centre */
+.stage-win { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none; perspective: 1800px; will-change: transform;
+  --accent: #ab9cff; }        /* the Flow window keeps its own colour while the section's changes */
+.stage-rise { width: min(var(--max), 100% - 2 * var(--gutter), (84vh - 18px) * 16 / 9 + 18px); pointer-events: auto; transform-origin: 50% 0; will-change: transform; }
+.stage-win .style-screen { perspective: 1600px; }
+.stage-win .display-frame { transform-style: preserve-3d; }
+.tt-live-wrap { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .9s var(--ease); }
+.tt-live-wrap.is-on { opacity: 1; }
+@media (max-width: 860px) {
+  .stage-win { position: relative; inset: auto; display: block; }
+  .stage-rise { width: min(var(--max), 100% - 2 * var(--gutter)); margin-inline: auto; }
+  .styles-grid { display: block; height: auto; margin-top: 70px; }
+  .stage-slot { display: none; }
+}
 .drum-wrap { position: relative; height: clamp(360px, 42vh, 460px); perspective: 900px; }
 .drum-wrap::before {            /* marks the focused style */
   content: ''; position: absolute; left: -22px; top: 50%; width: 3px; height: 1.1em; translate: 0 -50%; border-radius: 3px;
