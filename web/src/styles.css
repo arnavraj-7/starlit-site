@@ -439,6 +439,14 @@ main { position: relative; z-index: 1; }
 @media (prefers-reduced-motion: reduce) { .needle-line.is-on .nl-dot { animation: none; } }
 @media (hover: hover) {
   /* on the inner word: the intro animates the outer one, and a transition there would fight it */
-  .hero h1 .ww .w { transition: color .45s var(--ease), text-shadow .45s var(--ease), transform .5s var(--ease); }
-  .hero h1 .ww:hover .w { color: #ffe3cc; text-shadow: 0 0 .5em rgb(255 160 90 / .35); transform: translateY(-.04em); }
+  .hero h1 .ww .w { transition: transform .5s var(--ease); }
+  .hero h1 .ww:hover .w { transform: translateY(-.04em); }
 }
+
+/* the headline's words carry their own light: a warm half and a plain half of a gradient, clipped to
+   the letters, slid across to sing the word (feathered, like the app's wipe) */
+.hero h1 .w { color: transparent; -webkit-background-clip: text; background-clip: text;
+  background-image: linear-gradient(90deg, #ffe1c8 0%, #ffbf8f 44%, var(--paper) 56%, var(--paper) 100%);
+  background-size: 230% 100%; background-repeat: no-repeat; background-position: 100% 0;
+  padding-block: .16em .26em; margin-block: -.16em -.26em; }   /* the light reaches ascenders and descenders too */
+.no-motion .hero h1 .w { background-position: 100% 0; }

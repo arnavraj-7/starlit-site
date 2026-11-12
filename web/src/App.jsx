@@ -203,6 +203,21 @@ function Hero() {
       .to(words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 0.5)
       .call(() => { v.play().catch(() => {}) }, null, 1.35)
       .from('.hero .mini', { opacity: 0.001, x: -30, y: 20, scale: 0.94, duration: 1.1, ease: 'expo.out' }, 1.45)
+    // Once in, the headline is sung like a lyric: each word fills with warm light from left to
+    // right, for about as long as it takes to sing it, holds, then lets go; then again a little later.
+    // Only background-position of each word's own small text box changes.
+    const sing = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 5.5, delay: 1.2 })
+    words.forEach((w, i) => sing.to(w, { backgroundPositionX: '0%', duration: 0.22 + 0.055 * w.textContent.length, ease: 'none' }, i ? '>-0.02' : 0))
+    sing.to(words, { backgroundPositionX: '100%', duration: 0.9, ease: 'power2.inOut', stagger: 0.05 }, '+=1.4')
+    const startSinging = () => sing.play()
+    if (window.__introDone) startSinging(); else window.addEventListener('starlit:intro-done', startSinging, { once: true })
+    // a word you point at sings itself
+    const hovers = words.map(w => {
+      const enter = () => gsap.to(w, { backgroundPositionX: '0%', duration: 0.35, ease: 'power2.out', overwrite: 'auto' })
+      const leave = () => gsap.to(w, { backgroundPositionX: '100%', duration: 0.7, ease: 'power2.inOut', overwrite: 'auto' })
+      w.parentElement.addEventListener('pointerenter', enter); w.parentElement.addEventListener('pointerleave', leave)
+      return () => { w.parentElement.removeEventListener('pointerenter', enter); w.parentElement.removeEventListener('pointerleave', leave) }
+    })
     // Scroll: the screen grows toward you, the headline drifts away.
     gsap.to('.hero .screen-wrap', { scale: 1.07, ease: 'none', force3D: true,
       scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 75%', end: 'bottom top', scrub: true } })
@@ -214,7 +229,8 @@ function Hero() {
       scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 60%', end: 'bottom top', scrub: true } })
     // The preview only plays while it's on screen.
     ScrollTrigger.create({ trigger: root.current, start: 'top top', end: 'bottom top',
-      onLeave: () => v.pause(), onEnterBack: () => v.play().catch(() => {}) })
+      onLeave: () => { v.pause(); sing.pause() }, onEnterBack: () => { v.play().catch(() => {}); sing.play() } })
+    return () => { hovers.forEach(f => f()); window.removeEventListener('starlit:intro-done', startSinging) }
   }, { scope: root })
   return (
     <section className="hero" id="top" ref={root}>
