@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import FeatureBackdrops from './FeatBg.jsx'
 
 // The details, shown rather than listed: a pinned stage that changes as you scroll through the
 // features, each with a small live scene of what it does. Everything here moves with
@@ -27,27 +28,24 @@ function Colour({ on }) {
     return () => clearInterval(id)
   }, [on])
   // The colour change stays inside this scene; the washes behind it cross-fade by opacity.
-  useEffect(() => { box.current.style.setProperty('--accent', ACCENTS[keys[k]]) }, [k])
+  useEffect(() => {
+    box.current.style.setProperty('--accent', ACCENTS[keys[k]])
+    window.dispatchEvent(new CustomEvent('starlit:cover', { detail: k }))     // the backdrop follows the cover
+  }, [k])
   return (
     <div className="sc sc-colour" ref={box}>
       <div className="colour-wash" aria-hidden="true">{keys.map((c, i) => <i key={c} className={i === k ? 'is-on' : ''} style={{ '--accent': ACCENTS[c] }} />)}</div>
       <div className="covers-row">
         {keys.map((c, i) => <img key={c} src={`/media/covers/${c}.webp`} alt="" loading="lazy" decoding="async" className={i === k ? 'is-on' : ''} />)}
       </div>
-      <div className="mini-card glass">
-        <img src={`/media/covers/${keys[k]}.webp`} alt="" loading="lazy" decoding="async" />
-        <div>
-          <div className="mc-eyebrow">Now playing</div>
-          <div className="mc-title">Slow Satellites</div>
-          <div className="mc-line">Carry us <b>tonight</b></div>
-        </div>
-      </div>
-      <div className="swatch-bar" aria-hidden="true"><i /></div>
+      <div className="colour-line">Carry us <b>tonight</b></div>
     </div>
   )
 }
 
 function Edge({ on }) {
+  // while this one is on show, the page's own edge light does the demo
+  useEffect(() => { window.__edgeHype = on; return () => { window.__edgeHype = false } }, [on])
   return (
     <div className={`sc sc-edge ${on ? 'run' : ''}`}>
       <div className="edge-screen">
@@ -175,19 +173,18 @@ export default function Features() {
   return (
     <section className="features" id="details" ref={root}>
       <div className="feat-pin wrap">
-        <div className="feat-list">
-          <h2 className="h2">Other things it does</h2>
-          <ol>
-            {FEATURES.map((f, i) => (
-              <li key={f.id} className={i === active ? 'is-on' : ''} onClick={() => setActive(i)}>
-                <h3>{f.title}</h3>
-                <p><span>{f.text}</span></p>
-              </li>
-            ))}
-          </ol>
-          <div className="feat-rail" aria-hidden="true"><i /></div>
+        {/* one feature per screen: its title lights up word by word, like a sung line */}
+        <div className="feat-copy">
+          {FEATURES.map((f, i) => (
+            <div key={f.id} className={`fc ${i === active ? 'is-on' : ''}`} aria-hidden={i !== active}>
+              <h3 className="fc-title">{f.title.split(' ').map((w, j) => <span key={j} style={{ '--j': j }}>{w} </span>)}</h3>
+              <p className="fc-text">{f.text}</p>
+            </div>
+          ))}
+          <div className="feat-dots" aria-hidden="true">{FEATURES.map((f, i) => <i key={f.id} className={i === active ? 'is-on' : ''} />)}</div>
         </div>
-        <div className="feat-stage glass">
+        <FeatureBackdrops active={FEATURES[active].id} on={inView} />
+        <div className="feat-stage">
           {FEATURES.map((f, i) => {
             const Scene = SCENES[f.id]
             return <div key={f.id} className={`scene-wrap ${i === active ? 'is-on' : ''}`}><Scene on={i === active && inView && !reduce()} /></div>
