@@ -62,7 +62,6 @@ export default function Features() {
           <article className="fl" key={f.id}>
             <h3 className="fc-title">{f.title}</h3>
             <p className="fc-text">{f.text}</p>
-            <p className="fc-spec"><i aria-hidden="true" />{f.spec}</p>
           </article>
         ))}
       </div>
@@ -78,7 +77,6 @@ export default function Features() {
             <div key={f.id} className={`fc ${i === active ? 'is-on' : ''}`} aria-hidden={i !== active}>
               <h3 className="fc-title">{f.title.split(' ').map((w, j) => <span key={j} style={{ '--j': j }}>{w} </span>)}</h3>
               <p className="fc-text">{f.text}</p>
-              <p className="fc-spec"><i aria-hidden="true" />{f.spec}</p>
             </div>
           ))}
           <div className="feat-dots" aria-hidden="true">{FEATURES.map((f, i) => <i key={f.id} className={i === active ? 'is-on' : ''} />)}</div>

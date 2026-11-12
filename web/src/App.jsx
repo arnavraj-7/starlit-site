@@ -5,7 +5,8 @@ import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import EdgeLight from './EdgeLight.jsx'
-import { StippleSky, GrooveRecord, NeedleLine } from './Dots.jsx'
+import { StippleSky, HalftoneRecord, GrooveRecord, NeedleLine } from './Dots.jsx'
+import TurntableScene from './TurntableScene.jsx'
 import StyleBackdrops from './StyleBg.jsx'
 import TurntableLive from './TurntableLive.jsx'
 import Features from './Features.jsx'
@@ -504,6 +505,64 @@ function Styles() {
   )
 }
 
+// The record change, played by the scroll on the real turntable (see TurntableScene).
+function Turntable() {
+  const root = useRef(null)
+  const progress = useRef(0)
+  useGSAP(() => {
+    const steps = gsap.utils.toArray('.tt-steps .step')
+    const mm = gsap.matchMedia()
+    mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'none' },
+        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=240%', scrub: 0.5, pin: '.tt-pin', anticipatePin: 1,
+          onUpdate: self => { progress.current = self.progress },
+          onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) } })
+      const [a, b, c] = steps.map(sing)
+      tl.to('.progress-rail i', { scaleX: 1, duration: 1 }, 0)
+        .fromTo('.halftone', { rotation: -8, scale: 1.06 }, { rotation: 22, scale: 1, duration: 1 }, 0)     // the record turns as the scene plays
+        .to(a.targets, a.vars, 0)
+        .to(steps[0], { opacity: 0, y: -20, duration: 0.06 }, 0.3)
+        .fromTo(steps[1], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06 }, 0.36)
+        .to(b.targets, b.vars, 0.4)
+        .to(steps[1], { opacity: 0, y: -20, duration: 0.06 }, 0.58)
+        .fromTo(steps[2], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06 }, 0.64)
+        .to(c.targets, c.vars, 0.68)
+    })
+    mm.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
+      // No pinning: the finished state (record playing) stands in for the sequence.
+      progress.current = 1
+      document.querySelectorAll('.tt-steps .w').forEach(w => { w.style.opacity = '1' })
+      ScrollTrigger.create({ trigger: root.current, start: 'top 60%', onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) })
+    })
+  }, { scope: root })
+  return (
+    <section className="tt-sec" id="turntable" ref={root}>
+      <div className="plate plate--grooves" aria-hidden="true" />
+      <div className="tt-pin wrap">
+        <HalftoneRecord />
+        <TurntableScene progress={progress} cover="/media/covers/b.webp" />
+        <div>
+          <div className="progress-rail" aria-hidden="true"><i /></div>
+          <div className="tt-steps">
+            <div className="step">
+              <Sung as="h2" className="h2" text="A new song gets a new record." />
+              <p className="body">When the track changes, the album art turns into a record player. The sleeve slides in with the record inside.</p>
+            </div>
+            <div className="step">
+              <Sung as="h2" className="h2" text="The record comes out of the sleeve." />
+              <p className="body">It lands on the platter with the cover printed on its label, and starts turning.</p>
+            </div>
+            <div className="step">
+              <Sung as="h2" className="h2" text="Then the needle drops." />
+              <p className="body">The arm swings over, sets down, and creeps toward the label as the song plays. Pause the music and the arm lifts while the record slows to a stop.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function Setup() {
   const root = useRef(null)
   useGSAP(() => {
@@ -547,10 +606,7 @@ function Finale() {
             <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>
           </div>
         </ClickSpark>
-        <ul className="trust" aria-label="Before you download">
-          <li>No account</li><li>Reads what Windows is playing</li><li>Never touches your games</li><li>Free</li>
-        </ul>
-        <p className="fineprint">Windows 10 and 11, 64-bit.</p>
+        <p className="fineprint">Free for Windows 10 and 11. No account needed.</p>
       </div>
     </section>
   )
@@ -579,6 +635,7 @@ export default function App() {
         <Hero />
         <Styles />
         <Laptop />
+        <Turntable />
         <Features />
         <Setup />
         <Finale />
