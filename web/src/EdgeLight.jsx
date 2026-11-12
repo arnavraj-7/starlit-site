@@ -48,8 +48,10 @@ export default function EdgeLight() {
       if (++frame % 20 === 0) want = rgb(color())
       const y = scrollY, v = Math.abs(window.__lenis ? window.__lenis.velocity : y - lastY)   // px per frame
       lastY = y
-      if (v < 0.05 && energy < 0.01 && idle) return                 // at rest: the last frame (just the rim) stays
-      const kick = Math.min(1, v / 40)
+      // the details section's edge-light demo runs the real edge light on a 120 BPM beat
+      const hype = window.__edgeHype ? Math.pow(Math.max(0, Math.cos(now / 1000 * Math.PI * 2)), 6) * 0.7 + 0.12 : 0
+      if (v < 0.05 && energy < 0.01 && idle && !hype) return                 // at rest: the last frame (just the rim) stays
+      const kick = Math.max(Math.min(1, v / 40), hype)
       energy += (Math.max(energy * 0.94, kick) - energy) * Math.min(1, dt * 10)   // rise fast, drain slow
       speed += ((60 + energy * 1400) - speed) * Math.min(1, dt * 4)
       head += speed * dt
