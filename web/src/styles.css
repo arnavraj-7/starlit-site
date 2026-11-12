@@ -372,11 +372,11 @@ main { position: relative; z-index: 1; }
 /* where the needle rests: a short stretch of one groove, in the album colour */
 .groove-needle-light {
   --na: 55deg; --nr: 76%;
-  -webkit-mask-image: conic-gradient(from calc(var(--na) - 24deg), transparent 0, #000 9deg 39deg, transparent 48deg),
-                      radial-gradient(closest-side, transparent calc(var(--nr) - 4.6%), #000 calc(var(--nr) - 2.4%) calc(var(--nr) + 2.4%), transparent calc(var(--nr) + 4.6%));
+  -webkit-mask-image: conic-gradient(from calc(var(--na) - 30deg), transparent 0, #000 16deg 44deg, transparent 60deg),
+                      radial-gradient(closest-side, transparent calc(var(--nr) - 2.3%), #000 calc(var(--nr) - 1.1%) calc(var(--nr) + 1.1%), transparent calc(var(--nr) + 2.3%));
   -webkit-mask-composite: source-in;
-  mask-image: conic-gradient(from calc(var(--na) - 24deg), transparent 0, #000 9deg 39deg, transparent 48deg),
-              radial-gradient(closest-side, transparent calc(var(--nr) - 4.6%), #000 calc(var(--nr) - 2.4%) calc(var(--nr) + 2.4%), transparent calc(var(--nr) + 4.6%));
+  mask-image: conic-gradient(from calc(var(--na) - 30deg), transparent 0, #000 16deg 44deg, transparent 60deg),
+              radial-gradient(closest-side, transparent calc(var(--nr) - 2.3%), #000 calc(var(--nr) - 1.1%) calc(var(--nr) + 1.1%), transparent calc(var(--nr) + 2.3%));
   mask-composite: intersect;
   opacity: 0; transition: opacity .6s var(--ease);
 }
@@ -385,10 +385,7 @@ main { position: relative; z-index: 1; }
 .groove-label::after { content: ''; position: absolute; left: 50%; top: 50%; width: 1.4%; aspect-ratio: 1; translate: -50% -50%; border-radius: 50%; background: rgb(226 229 242 / .4); }
 .groove-needle-light { --na: inherit; --nr: inherit; }
 .groove.is-lit .groove-needle-light { opacity: 1; }
-/* a warm pool of light where the needle sits, under the glowing words */
-.groove-pool { position: absolute; left: var(--nx, 81%); top: var(--ny, 28%); width: 22%; aspect-ratio: 1; translate: -50% -50%; pointer-events: none;
-  background: radial-gradient(closest-side, rgb(255 170 106 / .3), rgb(255 140 80 / .12) 45%, transparent); opacity: 0; transition: opacity .8s var(--ease); }
-.groove.is-lit .groove-pool { opacity: 1; }
+
 /* the record sits above the hero's layout box so its arm can be picked up; only the arm takes the pointer */
 /* the hero's text box covers the record, so it lets the pointer through except on the text itself */
 .hero > .wrap, .hero-row { pointer-events: none; }
