@@ -17,7 +17,7 @@ export default function TurntableScene({ progress, cover }) {
   useEffect(() => {
     const el = root.current
     const q = s => el.querySelector(s)
-    const spin = q('.tt-spin'), ring = q('.tt-strobe'), carrier = q('.tt-carrier'), sleeve = q('.tt-sleeve')
+    const spin = q('.tt-spin'), ring = q('.tt-strobe'), carrier = q('.tt-carrier'), sleeve = q('.tt-sleeve:not(.tt-sleeve-back)'), back = q('.tt-sleeve-back')
     const armG = q('.tt-arm-g'), shadow = q('.tt-arm-shadow'), fill = el.parentElement.querySelector('.np-fill')
     const groove = angleFor(R_OUT)
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -51,8 +51,8 @@ export default function TurntableScene({ progress, cover }) {
       carrier.style.transform = `translate(${((cx - 44) / 75 * 100).toFixed(3)}%, 0) perspective(1200px) rotateY(${(-18 * lean).toFixed(2)}deg) rotateX(${(5 * lean).toFixed(2)}deg) scale(${cs.toFixed(4)})`
       carrier.style.setProperty('--lift', Math.max(0, (cs - 0.95) / 0.085).toFixed(3))     // its shadow spreads as it is lifted
       carrier.style.opacity = Math.max(0.001, ca).toFixed(3)
-      sleeve.style.transform = `translate(${((sx - 27) / 74 * 100).toFixed(3)}%, -50%) perspective(1200px) rotateY(-18deg) rotateX(5deg)`
-      sleeve.style.opacity = Math.max(0.001, sa).toFixed(3)
+      back.style.transform = sleeve.style.transform = `translate(${((sx - 27) / 74 * 100).toFixed(3)}%, -50%) perspective(1200px) rotateY(-18deg) rotateX(5deg)`
+      back.style.opacity = sleeve.style.opacity = Math.max(0.001, sa).toFixed(3)
       setArm(armG, shadow, a, lift)
       if (fill) fill.style.transform = `scaleX(${(0.04 + 0.1 * seg(p, 0.88, 1)).toFixed(4)})`
     }

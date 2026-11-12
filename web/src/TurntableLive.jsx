@@ -38,6 +38,9 @@ export function TurntableParts({ cover, sleeve }) {
   return (
     <>
       <div className="tt-platter"><div className="tt-strobe" /></div>
+      {/* the paper inner sleeve sits under the record and the jacket over it, so the record is
+          drawn out between the two; two layers moved together, since one can't be split by depth */}
+      {sleeve && <div className="tt-sleeve tt-sleeve-back"><div className="tt-inner" /></div>}
       <div className="tt-carrier">
         <div className="tt-spin">
           <div className="tt-vinyl" />
@@ -48,7 +51,6 @@ export function TurntableParts({ cover, sleeve }) {
       </div>
       {sleeve && (
         <div className="tt-sleeve">
-          <div className="tt-inner" />{/* the paper inner sleeve, showing at the opening */}
           <div className="tt-jacket"><img src={sleeve} alt="" /></div>
         </div>
       )}

@@ -22,6 +22,7 @@
 /* the jacket's thickness: a thin card edge along the bottom and right */
 .tt-live .tt-sleeve::after { content: ''; position: absolute; left: 1%; right: -.9%; top: 1.4%; bottom: -1.1%; z-index: -2; border-radius: 1.6%;
   background: linear-gradient(135deg, #3a3029, #17120f); box-shadow: 0 .4cqw .8cqw rgb(0 0 0 / .5); }
+.tt-live .tt-sleeve-back::after { content: none; }   /* the card edge belongs to the jacket */
 /* the paper inner sleeve, peeking out of the opening */
 .tt-live .tt-inner { position: absolute; z-index: -1; top: 5%; bottom: 5%; right: -4.5%; width: 30%; border-radius: 0 1.4cqw 1.4cqw 0;
   background: linear-gradient(90deg, #cfc6b8, #ece6dc 40%, #d9d1c4); box-shadow: inset -.3cqw 0 .6cqw rgb(0 0 0 / .18), 0 .5cqw 1.4cqw rgb(0 0 0 / .4); }
