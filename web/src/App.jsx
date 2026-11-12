@@ -16,6 +16,9 @@ import './chrome.css'
 // From React Bits (reactbits.dev, MIT + Commons Clause): copied in as source.
 import ClickSpark from './bits/ClickSpark.jsx'
 import BuySheet, { PRICE_LABEL } from './Buy.jsx'
+// Buying goes live once Razorpay's keys are on Vercel (VITE_SALES_OPEN=1 at build time); until
+// then the download is the only action and the free trial covers everyone.
+const SALES_OPEN = import.meta.env.VITE_SALES_OPEN === '1'
 const Laptop3D = lazy(() => import('./Laptop3D.jsx'))
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -218,8 +221,8 @@ function Hero({ onBuy }) {
             <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
-                <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>
-                <a className="btn btn--hero btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
+                {SALES_OPEN && <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>}
+                <a className={`btn btn--hero${SALES_OPEN ? ' btn--alt' : ''}`} href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
               </div>
             </ClickSpark>
             <p className="fineprint">Free for 7 days, then ₹599 once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
@@ -819,8 +822,10 @@ function Finale({ onBuy }) {
         <Sung as="h2" className="h2" text="Try it with your own music." />
         <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={12} sparkRadius={60} sparkSize={14} glow={0.7} duration={700} style={{ height: 'auto' }}>
           <div className="cta-row">
-            <span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
-            <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
+            {SALES_OPEN
+              ? <><span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
+                  <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></>
+              : <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>}
           </div>
         </ClickSpark>
         <p className="fineprint">Free for 7 days, then ₹599 once. Windows 10 and 11. No account needed.</p>
