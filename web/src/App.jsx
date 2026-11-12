@@ -295,6 +295,7 @@ function Hero() {
 function Laptop() {
   const root = useRef(null)
   const progress = useRef(0)
+  const entry = useRef(0)
   const [near, setNear] = useState(false)
   const [active, setActive] = useState(false)
   useGSAP(() => {
@@ -334,7 +335,19 @@ function Laptop() {
     if (window.__introDone) mount(); else window.addEventListener('starlit:intro-done', mount, { once: true })
     // It is mounted early (above) but only draws frames while the section is actually on screen;
     // on a tall window the early trigger is already active at the top of the page.
-    ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top', onToggle: s => setActive(s.isActive) })
+    // Arriving, the laptop rises out of the dark and fades in (entry, also read by the 3D scene);
+    // leaving, it fades before the next section is under it. No edge of it is ever cut by a seam.
+    const stage = root.current.querySelector('.laptop-stage')
+    const ends = self => {
+      const y = self.scroll(), vh = innerHeight
+      const k = Math.min(1, Math.max(0, (y - self.start) / (vh * 0.85)))
+      const out = Math.min(1, Math.max(0, (y - (self.end - vh * 1.05)) / (vh * 0.55)))
+      entry.current = k
+      const f = Math.min(1, Math.max(0, (k - 0.4) / 0.6))              // not until the section is well in
+      stage.style.opacity = (Math.min(f * f * (3 - 2 * f), 1 - out * out * (3 - 2 * out))).toFixed(3)
+    }
+    ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top', onToggle: s => setActive(s.isActive),
+      onUpdate: ends, onRefresh: ends })
     const late = setTimeout(() => setNear(true), 9000)      // whatever happens, it gets mounted
     return () => { clearTimeout(late); window.removeEventListener('starlit:intro-done', mount) }
   }, { scope: root })
@@ -355,7 +368,7 @@ function Laptop() {
           </div>
         </div>
         <div className="laptop-stage">
-          {near && <Suspense fallback={null}><Laptop3D progress={progress} active={active} /></Suspense>}
+          {near && <Suspense fallback={null}><Laptop3D progress={progress} entry={entry} active={active} /></Suspense>}
         </div>
         <div className="laptop-word" aria-hidden="true">
           <canvas className="lw-dots" ref={dots} />

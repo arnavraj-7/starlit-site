@@ -245,7 +245,7 @@ function dotHaloTexture() {
   return t
 }
 
-function Model({ progress, pointer, haloRef }) {
+function Model({ progress, entry, pointer, haloRef }) {
   const group = useRef(), lid = useRef(), legend = useRef(), screenMat = useRef(), well = useRef()
   const spill = useRef(), pool = useRef(), edge = useRef()
   const s = useRef({ p: 0, lid: Math.PI / 2 - 0.015, frame: 0, accent: readAccent(), tx: 0, ty: 0, drawn: 0 }).current
@@ -271,7 +271,11 @@ function Model({ progress, pointer, haloRef }) {
     if (size.width < size.height) { cam.x -= look.x; look.x = 0 }     // portrait: no room beside it for the caption
     // a narrow window shrinks the laptop: the camera keeps its offset from what it looks at, so
     // every pose (the close one too) stays framed, only smaller
-    cam.sub(look); look.multiplyScalar(sc); camera.position.copy(look).add(cam)
+    cam.sub(look)
+    // arriving: further off and lower in the frame, so it rises into its first pose
+    const e = smooth(clamp01(entry ? entry.current : 1))
+    cam.multiplyScalar(1 + 0.55 * (1 - e)); look.y += 2.4 * (1 - e)
+    look.multiplyScalar(sc); camera.position.copy(look).add(cam)
     camera.lookAt(look)
     s.tx = THREE.MathUtils.damp(s.tx, pointer.current.x, 2.5, dt); s.ty = THREE.MathUtils.damp(s.ty, pointer.current.y, 2.5, dt)
     group.current.rotation.y = rot + s.tx * 0.12 + Math.sin(t * 0.4) * 0.008
@@ -330,6 +334,13 @@ function Model({ progress, pointer, haloRef }) {
           <shaderMaterial ref={edge} uniforms={edgeUni} vertexShader={edgeVert} fragmentShader={edgeFrag}
             transparent depthWrite={false} blending={THREE.AdditiveBlending} toneMapped={false} />
         </mesh>
+        {/* the ring mark on the back of the lid, polished into the brushed metal */}
+        <group position={[0, LID_H / 2, -LID_T - 0.0012]} rotation-y={Math.PI}>
+          <mesh><ringGeometry args={[0.2, 0.235, 72]} /><meshPhysicalMaterial color="#c9ccd6" metalness={1} roughness={0.08} clearcoat={1} /></mesh>
+          <mesh><circleGeometry args={[0.061, 40]} /><meshPhysicalMaterial color="#c9ccd6" metalness={1} roughness={0.08} clearcoat={1} /></mesh>
+          <mesh position={[-0.167, -0.167, 0.0004]}><circleGeometry args={[0.112, 40]} /><meshPhysicalMaterial color="#454852" metalness={0.85} roughness={0.3} clearcoat={0.4} /></mesh>
+          <mesh position={[-0.167, -0.167, 0.0008]}><circleGeometry args={[0.077, 40]} /><meshPhysicalMaterial color="#c9ccd6" metalness={1} roughness={0.08} clearcoat={1} /></mesh>
+        </group>
         <mesh position={[0, LID_H - 0.035, 0.004]}>
           <circleGeometry args={[0.012, 24]} />
           <meshBasicMaterial color="#1a1c22" />
@@ -351,7 +362,7 @@ function Halo({ matRef }) {
   )
 }
 
-export default function Laptop3D({ progress, active = true }) {
+export default function Laptop3D({ progress, entry, active = true }) {
   const halo = useRef()
   const pointer = useRef({ x: 0, y: 0 })
   useEffect(() => {
@@ -375,7 +386,7 @@ export default function Laptop3D({ progress, active = true }) {
       <directionalLight position={[2, 8, 6]} intensity={1.35} />
       <directionalLight position={[-3, 2, 8]} intensity={0.45} />
       <Halo matRef={halo} />
-      <Model progress={progress} pointer={pointer} haloRef={halo} />
+      <Model progress={progress} entry={entry} pointer={pointer} haloRef={halo} />
       <ContactShadows position={[0, -0.002, 0]} opacity={0.6} scale={9} blur={2.6} far={2.4} resolution={512} color="#000000" />
       {/* Studio lighting built from shapes, so no environment map has to be downloaded:
           a soft box overhead, tall thin strips at the sides, a backdrop light behind. */}
