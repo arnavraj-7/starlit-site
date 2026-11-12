@@ -364,17 +364,29 @@ main { position: relative; z-index: 1; }
 .laptop-stage canvas { width: 100% !important; height: 100% !important; }
 .laptop-copy { z-index: 2; }
 
-/* ---------- live turntable (ported from the app) over the hero recording ---------- */
+/* ---------- live turntable (ported from the app) over the Flow recording ---------- */
+/* It covers the record player in the album card exactly: the art's box in the 2560x1440 capture is
+   188, 271, 584 x 584 (rerecord.sh prints it). Under it lies that patch of the card with the player
+   taken out (flow-plate.webp, from the same capture; the card never moves), so the recorded arm and
+   record never show through when this one lifts its arm or slows down. */
 .tt-live {
   --bz: clamp(5px, .6vw, 9px);
-  position: absolute; left: calc(var(--bz) + (100% - 2 * var(--bz)) * .0625); top: calc(var(--bz) + (100% - 2 * var(--bz)) * .10486); width: calc((100% - 2 * var(--bz)) * .25); aspect-ratio: 1;
-  border-radius: 6%; container-type: inline-size;
-  background:
-    radial-gradient(120% 80% at 18% 0%, rgb(255 255 255 / .07), transparent 55%),
-    radial-gradient(90% 70% at 50% 100%, color-mix(in oklch, var(--accent) 6%, transparent), transparent 70%),
-    linear-gradient(160deg, #1f1f24, #0d0d10 70%);
-  box-shadow: 0 6cqw 15cqw rgb(0 0 0 / .65), inset 0 1px 0 rgb(255 255 255 / .12), inset 0 0 0 1px rgb(255 255 255 / .06);
+  position: absolute; left: calc(var(--bz) + (100% - 2 * var(--bz)) * .0734375); top: calc(var(--bz) + (100% - 2 * var(--bz)) * .188194); width: calc((100% - 2 * var(--bz)) * .228125); aspect-ratio: 1;
+  container-type: inline-size;
 }
+/* the plate fades out over its last few pixels: the video's colours match the capture to within a
+   couple of levels, so a hard edge could still show as a faint square */
+.tt-live-wrap .tt-live::before { content: ''; position: absolute; inset: 0; background: url(/media/flow-plate.webp) 0 0 / 100% 100%;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 2.5%, #000 97.5%, transparent), linear-gradient(transparent, #000 2.5%, #000 97.5%, transparent);
+  -webkit-mask-composite: source-in; mask-composite: intersect; }
+/* the window is drawn big and scaled down, which beats the fine grooves into a moire; the recording
+   around it shows them softened, so here they are fainter */
+.tt-live-wrap .tt-vinyl {
+  background:
+    radial-gradient(circle, transparent 0 34%, rgb(255 255 255 / .05) 34.6%, transparent 35.4%, transparent 55.5%, rgb(0 0 0 / .55) 56%, transparent 57%,
+      transparent 74.5%, rgb(0 0 0 / .55) 75%, transparent 76%, transparent 97.4%, rgb(255 255 255 / .16) 98.4%, transparent 99.6%),
+    repeating-radial-gradient(circle, rgb(255 255 255 / .015) 0 .12cqw, transparent .12cqw .45cqw),
+    radial-gradient(circle, #121215, #08080a 70%, #0e0e11); }
 .tt-live .tt-platter { position: absolute; left: 4%; top: 10%; width: 80%; height: 80%; border-radius: 50%;
   background: radial-gradient(circle, #1a1a1e 0 92%, transparent 92.5%), conic-gradient(from 20deg, #9a9aa3, #4a4a51, #c4c4cc, #3f3f46, #a5a5ad, #4a4a51, #9a9aa3);
   box-shadow: 0 1cqw 3cqw rgb(0 0 0 / .55), inset 0 0 0 1px rgb(0 0 0 / .4); }
