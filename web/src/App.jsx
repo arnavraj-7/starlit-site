@@ -635,8 +635,8 @@ export default function App() {
         <Hero />
         <Styles />
         <Laptop />
-        <Turntable />
         <Features />
+        <Turntable />
         <Setup />
         <Finale />
       </main>
