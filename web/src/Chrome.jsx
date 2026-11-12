@@ -2,10 +2,16 @@ import { useRef } from 'react'
 import { gsap } from 'gsap'
 import { useGSAP } from '@gsap/react'
 
-// Starlit's mark: a record in eclipse, its rim lit in the three album colours, with a small
-// satellite riding the edge. Same artwork as the app icon (assets-src/logo).
+// Starlit's mark: a record with a small satellite on its rim. The app icon is drawn from the
+// same shapes (assets-src/logo/make-icon.py).
 export function Mark(props) {
-  return <img className="mark" src="/mark.png" alt="" width="64" height="64" aria-hidden="true" {...props} />
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" {...props}>
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="12" r="2.3" fill="currentColor" />
+      <circle cx="18.3" cy="5.7" r="2.9" fill="currentColor" stroke="var(--ink, #070912)" strokeWidth="1.4" />
+    </svg>
+  )
 }
 
 const LINKS = [['screens', 'Second screen'], ['styles', 'Styles'], ['turntable', 'Record player'], ['details', 'Other features']]
