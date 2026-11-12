@@ -81,5 +81,5 @@
 
 /* point at a letter of the name and it lights up */
 .wordmark .ww .w { transition: filter .45s var(--ease), -webkit-text-stroke-color .45s var(--ease); }
-.wordmark .ww:hover .w { filter: drop-shadow(0 0 10px var(--wc)) drop-shadow(0 0 34px color-mix(in srgb, var(--wc) 70%, transparent)) brightness(1.35); }
+.wordmark .ww:hover .w { filter: drop-shadow(0 0 10px var(--wc)) drop-shadow(0 0 34px color-mix(in srgb, var(--wc) 70%, transparent)); }   /* glow in the letter's own colour, no brightening */
 .wordmark { cursor: default; }
