@@ -1,4 +1,4 @@
-/* ---------- what it does: one photograph you can look into per feature ---------- */
+/* ---------- what it does: one dot-matrix wall, one feature per screen ---------- */
 .features { position: relative; }
 .feat-pin { position: relative; height: 100vh; overflow: hidden; }
 .feat-gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -23,11 +23,9 @@
 .feat-dots i { width: 18px; height: 3px; border-radius: 3px; background: rgb(255 255 255 / .16); transition: width .5s var(--ease), background .5s var(--ease); }
 .feat-dots i.is-on { width: 44px; background: #4fe3cf; }
 
-/* phones, narrow windows and reduced motion: the photographs in a plain column */
+/* phones, narrow windows and reduced motion: a plain column */
 .features--list { padding-block: 90px; }
 .features--list .fl { margin-bottom: 64px; }
-.features--list img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; object-position: 75% 50%; border-radius: 16px; margin-bottom: 22px;
-  box-shadow: 0 0 0 1px rgb(255 255 255 / .07); }
 .features--list .fc-title { font-size: clamp(2rem, 7vw, 3rem); }
 .features--list .fc-title, .features--list .fc-text { color: var(--paper); }
 .features--list .fc-text { color: var(--mute); }
