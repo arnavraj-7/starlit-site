@@ -4,10 +4,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
-import Stars from './Stars.jsx'
 import EdgeLight from './EdgeLight.jsx'
-import Nebula from './Nebula.jsx'
-import { Grooves, StageLights } from './Backdrops.jsx'
+import { StippleSky, HalftoneRecord, GrooveRecord } from './Dots.jsx'
+import StyleBackdrops from './StyleBg.jsx'
 import TurntableLive from './TurntableLive.jsx'
 import TurntableScene from './TurntableScene.jsx'
 import Features from './Features.jsx'
@@ -195,6 +194,7 @@ function Hero() {
     // name, the headline and the screen all arrive in one move.
     Promise.all([document.fonts.ready, loaded]).then(calm).then(() => { window.__introAt = performance.now(); performance.mark('starlit-intro'); html.classList.add('is-in'); tl.play() })
     tl.from('.stars', { opacity: 0, duration: 1.4, ease: 'power2.out' }, 0)
+      .from('.groove', { opacity: 0, scale: 0.94, rotation: -14, duration: 2.4, ease: 'expo.out' }, 0)
       .from('.masthead', { opacity: 0.001, duration: 1, ease: 'power2.out' }, 0.1)
       .from('.hero h1 .ww', { yPercent: 55, duration: 1.25, ease: 'power4.out', stagger: 0.055 }, 0.1)
       .from('.hero h1 .ww', { opacity: 0.001, duration: 0.6, ease: 'power1.inOut', stagger: 0.055 }, 0.1)
@@ -206,6 +206,8 @@ function Hero() {
     // Scroll: the screen grows toward you, the headline drifts away.
     gsap.to('.hero .screen-wrap', { scale: 1.07, ease: 'none', force3D: true,
       scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 75%', end: 'bottom top', scrub: true } })
+    gsap.to('.groove', { yPercent: 18, ease: 'none',
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } })
     gsap.to('.hero-row', { y: -140, opacity: 0.1, ease: 'none', force3D: true,
       scrollTrigger: { trigger: '.hero', start: 'top top', end: '55% top', scrub: true } })
     gsap.to('.hero .mini', { y: -60, ease: 'none', force3D: true,
@@ -216,6 +218,7 @@ function Hero() {
   }, { scope: root })
   return (
     <section className="hero" id="top" ref={root}>
+      <GrooveRecord />
       <div className="wrap masthead"><span className="brand"><Mark />Starlit</span></div>
       <div className="wrap" style={{ perspective: '1600px' }}>
         <div className="hero-row">
@@ -361,6 +364,7 @@ function Styles() {
   return (
     <section className="styles-sec" id="styles" ref={root}>
       <div className="styles-pin wrap">
+        <StyleBackdrops active={STYLES[active].id} />
         <div>
           <div className="drum-wrap" aria-hidden="true">
             <div className="drum">{STYLES.map(s => <div className="drum-item" key={s.id}>{s.name}</div>)}</div>
@@ -403,7 +407,7 @@ function Turntable() {
           onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) } })
       const [a, b, c] = steps.map(sing)
       tl.to('.progress-rail i', { scaleX: 1, duration: 1 }, 0)
-        .to('.groove-sheen', { rotation: 40, duration: 1 }, 0)
+        .fromTo('.halftone', { rotation: -8, scale: 1.06 }, { rotation: 22, scale: 1, duration: 1 }, 0)     // the record turns as the scene plays
         .to(a.targets, a.vars, 0)
         .to(steps[0], { opacity: 0, y: -20, duration: 0.06 }, 0.3)
         .fromTo(steps[1], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06 }, 0.36)
@@ -421,8 +425,9 @@ function Turntable() {
   }, { scope: root })
   return (
     <section className="tt-sec" id="turntable" ref={root}>
-      <div className="plate plate--grooves" aria-hidden="true"><Grooves /><div className="groove-sheen" /></div>
+      <div className="plate plate--grooves" aria-hidden="true" />
       <div className="tt-pin wrap">
+        <HalftoneRecord />
         <TurntableScene progress={progress} cover="/media/covers/b.webp" />
         <div>
           <div className="progress-rail" aria-hidden="true"><i /></div>
@@ -479,17 +484,9 @@ function Finale() {
     // The closing line is sung as you scroll into it.
     gsap.to('.finale .w', { opacity: 1, stagger: 0.5, ease: 'none',
       scrollTrigger: { trigger: '.finale', start: 'top 75%', end: 'center 50%', scrub: 0.6 } })
-    // The beams start swung open and dark, and close in on the button as the section arrives.
-    gsap.utils.toArray('.beam-arm').forEach(el => {
-      gsap.fromTo(el, { rotation: Number(el.dataset.open), opacity: 0 }, { rotation: 0, opacity: 1, ease: 'none',
-        scrollTrigger: { trigger: '.finale', start: 'top 85%', end: 'center 60%', scrub: 0.6 } })
-    })
-    gsap.fromTo('.pool', { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, ease: 'none',
-      scrollTrigger: { trigger: '.finale', start: 'top 60%', end: 'center 55%', scrub: 0.6 } })
   }, { scope: root })
   return (
     <section className="finale" id="download" ref={root}>
-      <StageLights />
       <div className="wrap">
         <Sung as="h2" className="h2" text="Try it with your own music." />
         <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={12} sparkRadius={60} sparkSize={14} glow={0.7} duration={700} style={{ height: 'auto' }}>
@@ -520,8 +517,7 @@ export default function App() {
   useSungHeadings()
   return (
     <>
-      <Nebula />
-      <Stars />
+      <StippleSky />
       <EdgeLight />
       <main>
         <Hero />
