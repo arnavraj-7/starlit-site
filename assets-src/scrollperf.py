@@ -16,7 +16,7 @@ with sync_playwright() as p:
     if os.environ.get('CSS'): pg.add_init_script('addEventListener("DOMContentLoaded", () => { const s = document.createElement("style"); s.textContent = ' + repr(os.environ['CSS']) + '; document.head.appendChild(s) })')
     pg.goto('http://localhost:4317/', wait_until='networkidle')
     pg.wait_for_timeout(7000)                      # intro done, 3D warmed up
-    marks = pg.evaluate("""() => ['#top','#screens','#styles','#turntable','#details','.setup-sec','#download','.footer'].map(s => { const e = document.querySelector(s); return [s, Math.round(e.getBoundingClientRect().top + scrollY)]; })""")
+    marks = pg.evaluate("""() => ['#top','#screens','#styles','#turntable','#details','.setup-sec','#download','.footer'].map(s => { const e = document.querySelector(s); return e ? [s, Math.round(e.getBoundingClientRect().top + scrollY)] : null; }).filter(Boolean).sort((a, b) => a[1] - b[1])""")
     total = pg.evaluate('document.documentElement.scrollHeight - innerHeight')
     pg.evaluate('window.__fr = []; window.__n = 0')
     pg.mouse.move(1280, 720)
