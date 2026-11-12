@@ -14,9 +14,10 @@ export function Mark(props) {
   )
 }
 
-const LINKS = [['screens', 'Second screen'], ['styles', 'Styles'], ['turntable', 'Record player'], ['details', 'Other features']]
+// violet -> amber -> teal across the seven letters of the name
+const WORDMARK = ['#ab9cff', '#c8a3d6', '#e6a8a1', '#ffaa6a', '#c3bd8a', '#89d0ad', '#4fe3cf']
 
-// There is no navigation bar: the page is one scroll, and these links at the bottom are the way back.
+// The page ends on its name, lit letter by letter, and one quiet line.
 export function Footer({ downloadUrl }) {
   const root = useRef(null)
   useGSAP(() => {
@@ -27,23 +28,14 @@ export function Footer({ downloadUrl }) {
   }, { scope: root })
   return (
     <footer className="footer" ref={root}>
-      <div className="wrap footer-top">
-        <div className="footer-brand">
-          <span className="brand"><Mark />Starlit</span>
-          <p>A lyrics visualizer for Windows. Free to download.</p>
-        </div>
-        <nav className="footer-links" aria-label="Sections">
-          {LINKS.map(([id, label]) => <a key={id} href={'#' + id}>{label}</a>)}
-          <a href={downloadUrl}>Download</a>
-        </nav>
-      </div>
       <div className="wordmark sung" aria-hidden="true">
-        {'Starlit'.split('').map((ch, i) => <span className="ww" data-w={ch} key={i}><span className="w">{ch}</span></span>)}
+        {'Starlit'.split('').map((ch, i) => <span className="ww" data-w={ch} key={i}><span className="w" style={{ '--wc': WORDMARK[i] }}>{ch}</span></span>)}
       </div>
       <div className="wrap footer-base">
-        <span>© 2026 Starlit</span>
-        <span>The songs on this page are demo tracks made for it.</span>
-        <a href="#top">Back to top</a>
+        <p><span className="footer-copy">© 2026 Starlit</span><span>The songs on this page were written for it.</span></p>
+        <a className="to-top" href="#top" aria-label="Back to top">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </a>
       </div>
     </footer>
   )
