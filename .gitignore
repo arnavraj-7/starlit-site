@@ -23,3 +23,5 @@ assets-src/probe_*.js
 # rejected AI backgrounds (the page draws its own now)
 assets-src/bg/
 assets-src/logo/out/check.jpg
+assets-src/round*.py
+assets-src/*.jsx.txt
