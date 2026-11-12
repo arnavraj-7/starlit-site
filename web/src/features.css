@@ -5,8 +5,12 @@
 /* one still layer over the picture: the words' side darkens, and top and bottom melt into the page */
 .feat-shade { position: absolute; inset: 0; pointer-events: none;
   background:
-    linear-gradient(90deg, var(--ink) 0%, rgb(7 9 18 / .86) 22%, rgb(7 9 18 / .35) 46%, transparent 64%),
-    linear-gradient(180deg, var(--ink) 0%, transparent 16%, transparent 80%, var(--ink) 100%); }
+    linear-gradient(90deg, rgb(7 9 18 / .9) 0%, rgb(7 9 18 / .7) 22%, rgb(7 9 18 / .25) 46%, transparent 64%);
+  /* static layer: fades out at top and bottom, so the page above and below runs straight through */
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 22%, #000 78%, transparent); }
+.feat-gl { -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent);
+                   mask-image: linear-gradient(180deg, transparent, #000 14%, #000 86%, transparent); }
 .feat-copy { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: center; }
 .feat-count { position: absolute; top: clamp(70px, 13vh, 150px); font: 500 clamp(.85rem, .8vw, 1.15rem)/1 var(--mono, ui-monospace, monospace); letter-spacing: .14em; color: var(--dim); }
 .feat-count b { color: var(--paper); font-weight: 600; }

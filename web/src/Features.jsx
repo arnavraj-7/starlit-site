@@ -146,7 +146,8 @@ void main() {
   float d = length(px - c);
   float m = smoothstep(r + .9, r - .9, d), mi = smoothstep(rIdle + .7, rIdle - .7, d);
   vec3 lit = col / max(L, .06) * min(1., L * 1.9 + .25);              // the dot's colour, kept bright
-  gl_FragColor = vec4(lit * m + vec3(.11, .12, .16) * mi * (1. - m), 1.);
+  float a = clamp(m + mi * .55 * (1. - m), 0., 1.);
+  gl_FragColor = vec4(lit * m + vec3(.2, .22, .28) * mi * .55 * (1. - m), a);   // premultiplied
 }`
 
 function useWall(canvasRef, live, enabled) {
@@ -154,7 +155,7 @@ function useWall(canvasRef, live, enabled) {
   useEffect(() => {
     const cv = canvasRef.current
     if (!cv) return
-    const gl = cv.getContext('webgl', { antialias: false, alpha: false })
+    const gl = cv.getContext('webgl', { antialias: false, alpha: true, premultipliedAlpha: true })   // the page's sky shows between the dots
     if (!gl) return
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(s)); return s }
     const pr = gl.createProgram()
