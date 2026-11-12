@@ -168,6 +168,12 @@ main { position: relative; z-index: 1; }
 /* ---------- laptop ---------- */
 .laptop-sec { position: relative; }
 .laptop-pin { height: 100vh; display: grid; place-items: center; overflow: hidden; }
+/* while pinned, a soft curtain of the page's own colour at the top edge: whatever of the hero
+   reaches down past its end (its floating mini player) never shows over the laptop */
+.laptop-pin::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 16vh; z-index: 4; pointer-events: none;
+  background: linear-gradient(var(--ink) 35%, rgb(7 9 18 / 0)); opacity: 0; transition: opacity .3s var(--ease); }
+.laptop-sec.is-pinned .laptop-pin::before { opacity: 1; }
+.laptop-sec { z-index: 3; }
 .laptop-copy { position: absolute; left: 0; right: 0; top: clamp(56px, 8vh, 104px); text-align: center; pointer-events: none; z-index: 2; }
 .laptop-copy .h2 { font-size: clamp(2rem, 3.3vw, 5.4rem); }
 .laptop-copy .step { position: absolute; left: 0; right: 0; opacity: 0; }
@@ -177,14 +183,16 @@ main { position: relative; z-index: 1; }
 /* the last caption sits to the left of the turned laptop */
 .laptop-copy .step--side { top: calc(50vh - clamp(56px, 8vh, 104px) - 3em); left: 0; right: auto; text-align: left; max-width: 34vw; }
 .laptop-copy .step--side .h2 { margin-inline: 0; font-size: clamp(2.2rem, 3.6vw, 6rem); max-width: 11ch; }
-.laptop-copy .step--side .body { margin-inline: 0; max-width: 30ch; }
+.laptop-copy .step--side { max-width: 40vw; }
+.laptop-copy .step--side .body { margin-inline: 0; max-width: 36ch; text-wrap: balance; }
 /* the word that steps out of the laptop's screen */
 .laptop-word { position: absolute; inset: 0; z-index: 3; pointer-events: none; display: grid; place-items: center; }
 .laptop-word > * { grid-area: 1 / 1; }
 .lw-dots { width: 100%; height: 100%; opacity: 0; will-change: transform, opacity; }
-.lw-word { margin-top: -4.8vh; font: 800 clamp(5rem, 13vw, 22rem)/1 Inter, sans-serif; letter-spacing: -.045em; color: #fff3ea; opacity: 0; will-change: transform, opacity;
+.lw-word { margin-top: -4vh; font: 800 clamp(5rem, 13vw, 22rem)/1 Inter, sans-serif; letter-spacing: -.045em; color: #fff3ea; opacity: 0; will-change: transform, opacity;
   text-shadow: 0 0 .12em rgb(255 170 110 / .55), 0 0 .5em rgb(255 140 80 / .25); }
-.lw-tag { align-self: end; margin: 0 0 14vh; font-size: clamp(1rem, 1.05vw, 1.6rem); color: var(--mute); opacity: 0; }
+/* under the screen, not on its bezel */
+.lw-tag { align-self: end; margin: 0 0 5vh; font-size: max(14px, clamp(1rem, 1.05vw, 1.6rem)); color: rgb(255 255 255 / .55); opacity: 0; }
 .lw-tag b { color: #ffc496; font-weight: 700; margin-right: .5em; letter-spacing: .02em; }
 @media (max-width: 860px) {
   .laptop-copy .step--side { top: 0; left: 0; right: 0; max-width: none; text-align: center; }
@@ -465,9 +473,45 @@ main { position: relative; z-index: 1; }
 /* the headline is sung like a lyric: under each word a dim copy (the line still to come), over it
    the lit word, uncovered left to right by a feathered edge (--sungAt runs 100% -> 0%) */
 @property --sungAt { syntax: '<percentage>'; inherits: false; initial-value: 100%; }
-.hero h1.sung .ww::before { color: rgb(238 240 248 / .2); }
+.hero h1.sung .ww::before { color: rgb(238 240 248 / .28); }
 .hero h1.sung .w { color: #fff; opacity: 1;
   -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - var(--sungAt) * 1.12), transparent calc(112% - var(--sungAt) * 1.12));
           mask-image: linear-gradient(90deg, #000 calc(100% - var(--sungAt) * 1.12), transparent calc(112% - var(--sungAt) * 1.12));
   padding-block: .16em .26em; margin-block: -.16em -.26em; }   /* room for ascenders, descenders and the bloom */
 .no-motion .hero h1.sung .w { --sungAt: 0%; }
+
+/* ---------- from the outside review ---------- */
+/* the second hero action is a quiet link that points down */
+.link-down { display: inline-flex; align-items: center; gap: .5em; padding: 0 16px; min-height: 48px; font-weight: 600; color: rgb(255 255 255 / .65); text-decoration: none; transition: color .2s var(--ease); }
+.link-down span { display: inline-block; transition: transform .3s var(--ease); }
+.link-down:hover { color: var(--paper); }
+.link-down:hover span { transform: translateY(3px); }
+/* the line under the needle reads as "now playing": a pill with a small equaliser */
+.needle-line { display: inline-flex; width: fit-content; padding: 6px 16px 6px 12px; border-radius: 999px; font-size: clamp(1rem, .95vw, 1.45rem);
+  background: rgb(255 170 106 / .06); box-shadow: inset 0 0 0 1px rgb(255 170 106 / .22); }
+.nl-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: .7em; margin-right: .6em; align-self: center; }
+.nl-eq i { width: 2px; height: 100%; border-radius: 1px; background: #ffc496; transform-origin: bottom; transform: scaleY(.35); }
+.needle-line.is-on .nl-eq i { animation: nl-eq .9s ease-in-out infinite alternate; }
+.needle-line.is-on .nl-eq i:nth-child(2) { animation-delay: -.3s; } .needle-line.is-on .nl-eq i:nth-child(3) { animation-delay: -.6s; }
+@keyframes nl-eq { to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .needle-line.is-on .nl-eq i { animation: none; transform: scaleY(.7); } }
+/* drum: the neighbours can be clicked, and show their colour when pointed at */
+.drum-item.is-near { cursor: pointer; transition: color .25s var(--ease); }
+.drum-item.is-near:hover { color: color-mix(in srgb, var(--sc) 70%, white); }
+.drum-wrap::before { height: .74em; }                  /* the marker matches the capitals, not the line box */
+.style-screen .display-frame { border-top: 1px solid rgb(255 255 255 / .18); }   /* a lit top edge on the panel */
+/* setup: numbers in small square keys */
+.setup li::before { display: grid; place-items: center; width: 28px; height: 28px; margin-top: .25em; border-radius: 4px; box-shadow: inset 0 0 0 1px rgb(255 255 255 / .16);
+  font: 600 13px/1 ui-monospace, 'Geist Mono', monospace; letter-spacing: .04em; color: var(--accent); content: '0' counter(s); }
+.setup li { grid-template-columns: 52px 1fr; }
+/* download: the answers next to the button */
+.trust { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 28px; margin: 26px 0 10px; padding: 0; list-style: none;
+  font: 500 13px/1.4 ui-monospace, 'Geist Mono', monospace; letter-spacing: .02em; color: rgb(255 255 255 / .55); }
+.trust li { display: flex; align-items: center; gap: 10px; }
+.trust li::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+/* the hint by the tonearm's headshell */
+.groove-hint { position: absolute; left: var(--nx, 80%); top: var(--ny, 70%); z-index: 3; padding: 5px 11px; border-radius: 999px; white-space: nowrap;
+  font: 600 11px/1 Inter, sans-serif; letter-spacing: .04em; color: rgb(255 196 150 / .9); background: rgb(255 170 106 / .08); box-shadow: inset 0 0 0 1px rgb(255 170 106 / .25);
+  opacity: 0; transform: translate(calc(-100% - 22px), calc(-50% + 6px)); transition: opacity .6s var(--ease), transform .6s var(--ease); pointer-events: none; }
+.groove.hint-on .groove-hint { opacity: 1; transform: translate(calc(-100% - 22px), -50%); }

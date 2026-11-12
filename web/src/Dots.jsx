@@ -201,6 +201,7 @@ export function GrooveRecord() {
       <div className="groove-light"><canvas className="groove-spin" /></div>
       <div className="groove-needle-light"><canvas className="groove-spin" /></div>
       <div className="groove-label" />
+      <span className="groove-hint">Drag the needle</span>
       <svg className="groove-arm" viewBox="0 0 100 100">
         <defs>
           <linearGradient id="gaTube" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#5b5e6b" /><stop offset=".42" stopColor="#f1f2f7" /><stop offset=".6" stopColor="#babdca" /><stop offset="1" stopColor="#4a4d59" /></linearGradient>
@@ -300,6 +301,7 @@ function tonearm(el) {
     const [x, y] = toSvg(e)
     grabOff = angle - Math.atan2(y - py, x - px) * 180 / Math.PI          // keep the grip where it was taken
     dragging = true; liftTarget = 1; svg.setPointerCapture(e.pointerId); el.classList.add('is-lifted'); run()
+    dismissHint()
   }
   const move = e => {
     if (!dragging) return
@@ -321,7 +323,20 @@ function tonearm(el) {
   show()
   const go = () => { target = angleFor(grooveAt(R0 * 0.82)); run(); setTimeout(() => { liftTarget = 0; run() }, 900) }
   const t0 = setTimeout(go, 2200)
-  return () => { clearTimeout(t0); cancelAnimationFrame(raf); svg.removeEventListener('pointerdown', down); svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); svg.removeEventListener('pointercancel', up) }
+  // A small hint by the headshell once the needle is down, until the visitor goes near it or
+  // grabs it (then never again).
+  let seen = false
+  try { seen = localStorage.getItem('starlit:needle-hint') === '1' } catch {}
+  const dismissHint = () => {
+    el.classList.remove('hint-on'); removeEventListener('pointermove', near)
+    try { localStorage.setItem('starlit:needle-hint', '1') } catch {}
+  }
+  const near = e => {
+    const b = svg.getBoundingClientRect(), [x, y] = stylusAt(angle)
+    if (Math.hypot(e.clientX - (b.left + x / 100 * b.width), e.clientY - (b.top + y / 100 * b.height)) < 120) dismissHint()
+  }
+  const t1 = !seen && matchMedia('(hover: hover)').matches && setTimeout(() => { el.classList.add('hint-on'); addEventListener('pointermove', near, { passive: true }) }, 4800)
+  return () => { clearTimeout(t0); clearTimeout(t1); removeEventListener('pointermove', near); cancelAnimationFrame(raf); svg.removeEventListener('pointerdown', down); svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); svg.removeEventListener('pointercancel', up) }
 }
 
 // ---------------------------------------------------------------- the line under the needle
@@ -375,7 +390,7 @@ export function NeedleLine() {
   }, [])
   return (
     <p className={`needle-line ${line ? 'is-on' : ''}`} ref={ref} aria-live="off">
-      <span className="nl-dot" aria-hidden="true" />
+      <span className="nl-eq" aria-hidden="true"><i /><i /><i /></span>
       {line ? line.words.map((w, j) => <span key={j} className={j < line.cur ? 'sung' : j === line.cur ? 'now' : ''}>{w} </span>) : <span>Put the needle on the record</span>}
     </p>
   )

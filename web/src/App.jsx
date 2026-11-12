@@ -5,10 +5,9 @@ import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
 import EdgeLight from './EdgeLight.jsx'
-import { StippleSky, HalftoneRecord, GrooveRecord, NeedleLine } from './Dots.jsx'
+import { StippleSky, GrooveRecord, NeedleLine } from './Dots.jsx'
 import StyleBackdrops from './StyleBg.jsx'
 import TurntableLive from './TurntableLive.jsx'
-import TurntableScene from './TurntableScene.jsx'
 import Features from './Features.jsx'
 import { Logo, Footer } from './Chrome.jsx'
 import './features.css'
@@ -273,7 +272,7 @@ function Hero() {
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
                 <a className="btn" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
-                <a className="btn btn--ghost" href="#styles">See the styles</a>
+                <a className="link-down" href="#styles">See the styles <span aria-hidden="true">↓</span></a>
               </div>
             </ClickSpark>
             <p className="fineprint">Free, for Windows 10 and 11. Works with Spotify, Apple Music, YouTube Music and local files.</p>
@@ -305,27 +304,28 @@ function Laptop() {
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
-        trigger: root.current, start: 'top top', end: '+=400%', scrub: true, pin: '.laptop-pin', anticipatePin: 1,
+        trigger: root.current, start: 'top top', end: '+=300%', scrub: true, pin: '.laptop-pin', anticipatePin: 1,
         onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber),
+        onToggle: self => root.current.classList.toggle('is-pinned', self.isActive),
         onUpdate: self => { progress.current = self.progress },
       },
     })
     const s0 = sing(steps[0]), s1 = sing(steps[1])
-    // 1. closed, from above
-    tl.to(s0.targets, s0.vars, 0.02)
-      .to(steps[0], { opacity: 0, y: -40, duration: 0.07 }, 0.3)
-    // 3. the word steps out of the screen: the dots run ahead of the letters, so it has depth
-      .fromTo(q('.lw-dots'), { scale: 0.5, opacity: 0 }, { scale: 1.12, opacity: 1, duration: 0.1, ease: 'power2.in' }, 0.575)
-      .fromTo(q('.lw-word'), { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.1, ease: 'power2.in' }, 0.575)
-      .fromTo(q('.lw-tag'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.04 }, 0.645)
-      .to(q('.laptop-stage canvas'), { opacity: 0.22, duration: 0.06 }, 0.59)
-      .to(q('.lw-dots'), { scale: 1.75, opacity: 0, duration: 0.08, ease: 'power1.in' }, 0.7)
-      .to(q('.lw-word'), { scale: 1.08, opacity: 0, y: '-8vh', duration: 0.07, ease: 'power1.in' }, 0.705)
-      .to(q('.lw-tag'), { opacity: 0, duration: 0.03 }, 0.7)
-      .to(q('.laptop-stage canvas'), { opacity: 1, duration: 0.06 }, 0.72)
-    // 4. pulled back and turned, edge light running
-      .fromTo(steps[1], { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.05 }, 0.8)
-      .to(s1.targets, s1.vars, 0.82)
+    // 1. the lid opening, the screen waking
+    tl.to(s0.targets, s0.vars, 0.01)
+      .to(steps[0], { opacity: 0, y: -40, duration: 0.06 }, 0.24)
+    // 2. close on the screen; the word steps out of it, the dots running ahead of the letters
+      .fromTo(q('.lw-dots'), { scale: 0.42, opacity: 0 }, { scale: 1.12, opacity: 1, duration: 0.09, ease: 'power2.in' }, 0.425)
+      .fromTo(q('.lw-word'), { scale: 0.42, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.09, ease: 'power2.in' }, 0.425)
+      .fromTo(q('.lw-tag'), { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.035 }, 0.49)
+      .to(q('.laptop-stage canvas'), { opacity: 0.22, duration: 0.05 }, 0.44)
+      .to(q('.lw-dots'), { scale: 1.75, opacity: 0, duration: 0.07, ease: 'power1.in' }, 0.56)
+      .to(q('.lw-word'), { scale: 1.08, opacity: 0, y: '-8vh', duration: 0.06, ease: 'power1.in' }, 0.565)
+      .to(q('.lw-tag'), { opacity: 0, duration: 0.03 }, 0.56)
+      .to(q('.laptop-stage canvas'), { opacity: 1, duration: 0.05 }, 0.58)
+    // 3. pulled back: the monitor rises behind it, both screens playing
+      .fromTo(steps[1], { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.05 }, 0.76)
+      .to(s1.targets, s1.vars, 0.78)
       .set({}, {}, 1)
   }, { scope: root })
   useGSAP(() => {
@@ -418,6 +418,14 @@ function Styles() {
   const [active, setActive] = useState(0)
   const [onScreen, setOnScreen] = useState(false)
   const videos = useRef([])
+  const drumST = useRef(null)
+  // a style name you click scrolls the drum round to it
+  const goStyle = i => {
+    const st = drumST.current
+    if (!st) { setActive(i); return }
+    const y = st.start + (st.end - st.start) * i / (STYLES.length - 1)
+    if (window.__lenis) window.__lenis.scrollTo(y, { duration: 1.1 }); else scrollTo({ top: y, behavior: 'smooth' })
+  }
   useTilt(frame, 3)
   useEffect(() => { root.current.style.setProperty('--accent', STYLES[active].accent) }, [active])
   useEffect(() => {
@@ -429,8 +437,9 @@ function Styles() {
     const place = p => {
       items.forEach((el, i) => {
         const a = (i - p) * step, rad = a * Math.PI / 180, off = Math.abs(i - p)
-        el.style.transform = `translateY(${(Math.sin(rad) * R).toFixed(2)}px) translateZ(${((Math.cos(rad) - 1) * R).toFixed(2)}px) rotateX(${(-a).toFixed(2)}deg) scale(${(1 - Math.min(1, off) * 0.08).toFixed(3)})`
-        el.style.opacity = String(Math.max(0, 1 - off * 0.62).toFixed(3))
+        el.style.transform = `translateY(${(Math.sin(rad) * R).toFixed(2)}px) translateZ(${((Math.cos(rad) - 1) * R).toFixed(2)}px) rotateX(${(-a).toFixed(2)}deg) scale(${(1 - Math.min(1, off) * 0.18).toFixed(3)})`
+        el.style.opacity = String(Math.max(0, 1 - off * 0.76).toFixed(3))
+        el.classList.toggle('is-near', off > 0.5 && off < 1.5)
       })
     }
     place(0)
@@ -440,7 +449,7 @@ function Styles() {
       gsap.to(state, {
         p: STYLES.length - 1, ease: 'none',
         snap: { snapTo: 1 / (STYLES.length - 1), duration: { min: 0.25, max: 0.7 }, ease: 'power3.inOut' },
-        scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${STYLES.length * 70}%`, scrub: 0.5, pin: '.styles-pin', anticipatePin: 1,
+        scrollTrigger: { trigger: root.current, start: 'top top', end: `+=${STYLES.length * 70}%`, scrub: 0.5, pin: '.styles-pin', anticipatePin: 1, onRefresh: s => { drumST.current = s },
           onEnter: () => setAccent(STYLES[0].accent), onEnterBack: () => setAccent(STYLES[Math.round(state.p)].accent) },
         onUpdate: () => {
           place(state.p)
@@ -469,7 +478,7 @@ function Styles() {
         <StyleBackdrops active={STYLES[active].id} />
         <div>
           <div className="drum-wrap" aria-hidden="true">
-            <div className="drum">{STYLES.map(s => <div className="drum-item" key={s.id}>{s.name}</div>)}</div>
+            <div className="drum">{STYLES.map((s, i) => <div className="drum-item" key={s.id} style={{ '--sc': s.accent }} onClick={() => goStyle(i)}>{s.name}</div>)}</div>
           </div>
           <div className="style-info">
             {STYLES.map((s, i) => (
@@ -495,64 +504,6 @@ function Styles() {
   )
 }
 
-// The record change, played by the scroll on the real turntable (see TurntableScene).
-function Turntable() {
-  const root = useRef(null)
-  const progress = useRef(0)
-  useGSAP(() => {
-    const steps = gsap.utils.toArray('.tt-steps .step')
-    const mm = gsap.matchMedia()
-    mm.add('(min-width: 861px) and (prefers-reduced-motion: no-preference)', () => {
-      const tl = gsap.timeline({ defaults: { ease: 'none' },
-        scrollTrigger: { trigger: root.current, start: 'top top', end: '+=240%', scrub: 0.5, pin: '.tt-pin', anticipatePin: 1,
-          onUpdate: self => { progress.current = self.progress },
-          onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) } })
-      const [a, b, c] = steps.map(sing)
-      tl.to('.progress-rail i', { scaleX: 1, duration: 1 }, 0)
-        .fromTo('.halftone', { rotation: -8, scale: 1.06 }, { rotation: 22, scale: 1, duration: 1 }, 0)     // the record turns as the scene plays
-        .to(a.targets, a.vars, 0)
-        .to(steps[0], { opacity: 0, y: -20, duration: 0.06 }, 0.3)
-        .fromTo(steps[1], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06 }, 0.36)
-        .to(b.targets, b.vars, 0.4)
-        .to(steps[1], { opacity: 0, y: -20, duration: 0.06 }, 0.58)
-        .fromTo(steps[2], { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.06 }, 0.64)
-        .to(c.targets, c.vars, 0.68)
-    })
-    mm.add('(max-width: 860px), (prefers-reduced-motion: reduce)', () => {
-      // No pinning: the finished state (record playing) stands in for the sequence.
-      progress.current = 1
-      document.querySelectorAll('.tt-steps .w').forEach(w => { w.style.opacity = '1' })
-      ScrollTrigger.create({ trigger: root.current, start: 'top 60%', onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) })
-    })
-  }, { scope: root })
-  return (
-    <section className="tt-sec" id="turntable" ref={root}>
-      <div className="plate plate--grooves" aria-hidden="true" />
-      <div className="tt-pin wrap">
-        <HalftoneRecord />
-        <TurntableScene progress={progress} cover="/media/covers/b.webp" />
-        <div>
-          <div className="progress-rail" aria-hidden="true"><i /></div>
-          <div className="tt-steps">
-            <div className="step">
-              <Sung as="h2" className="h2" text="A new song gets a new record." />
-              <p className="body">When the track changes, the album art turns into a record player. The sleeve slides in with the record inside.</p>
-            </div>
-            <div className="step">
-              <Sung as="h2" className="h2" text="The record comes out of the sleeve." />
-              <p className="body">It lands on the platter with the cover printed on its label, and starts turning.</p>
-            </div>
-            <div className="step">
-              <Sung as="h2" className="h2" text="Then the needle drops." />
-              <p className="body">The arm swings over, sets down, and creeps toward the label as the song plays. Pause the music and the arm lifts while the record slows to a stop.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function Setup() {
   const root = useRef(null)
   useGSAP(() => {
@@ -564,13 +515,13 @@ function Setup() {
     <section className="section setup-sec" ref={root}>
       <div className="wrap setup-grid">
         <div>
-          <Sung as="h2" className="h2 sung-scroll" text="Setting it up" />
-          <p className="body">It takes about a minute, and most of that is the download.</p>
+          <Sung as="h2" className="h2 sung-scroll" text="Up and running in a minute." />
+          <p className="body">No account, no keys, nothing to connect.</p>
         </div>
         <ol className="setup">
-          <li><h3>Install it</h3><p>Run the installer. There’s no account and nothing to sign in to.</p></li>
-          <li><h3>Play something</h3><p>Use any app or browser tab. The lyrics show up on their own.</p></li>
-          <li><h3>Pick a style</h3><p>Each screen can have a different one, and you can switch whenever you like.</p></li>
+          <li><h3>Run the installer</h3><p>One small Windows app. Nothing to sign in to.</p></li>
+          <li><h3>Hit play anywhere</h3><p>Spotify, Apple Music, YouTube Music or your own files. Starlit picks it up by itself.</p></li>
+          <li><h3>Pick a style for each screen</h3><p>Flow, Constellation or Pulse, on your monitor or your laptop.</p></li>
         </ol>
       </div>
     </section>
@@ -596,7 +547,10 @@ function Finale() {
             <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>
           </div>
         </ClickSpark>
-        <p className="fineprint">Free. Windows 10 and 11, on one screen or two.</p>
+        <ul className="trust" aria-label="Before you download">
+          <li>No account</li><li>Reads what Windows is playing</li><li>Never touches your games</li><li>Free</li>
+        </ul>
+        <p className="fineprint">Windows 10 and 11, 64-bit.</p>
       </div>
     </section>
   )
@@ -623,9 +577,8 @@ export default function App() {
       <EdgeLight />
       <main>
         <Hero />
-        <Laptop />
         <Styles />
-        <Turntable />
+        <Laptop />
         <Features />
         <Setup />
         <Finale />
