@@ -108,3 +108,57 @@ export function StippleSky() {
     </div>
   )
 }
+
+// ---------------------------------------------------------------- halftone record
+export function HalftoneRecord() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const cv = ref.current
+    let drawn = false, alive = true
+    const draw = async () => {
+      const img = await loadImage('/media/src/record.webp')
+      if (!alive) return
+      const dpr = Math.min(devicePixelRatio || 1, 2)
+      const D = cv.clientWidth
+      cv.width = Math.round(D * dpr); cv.height = Math.round(D * dpr)
+      const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+      const sample = sampler(img, D, D, 2, 'contain')
+      // a 45-degree screen, light dots on dark: brighter ink, bigger dot
+      const cell = Math.max(7, D / 150), c = D / 2, n = Math.ceil(D / cell)
+      const cos = Math.SQRT1_2, sin = Math.SQRT1_2
+      ctx.fillStyle = '#ffb27a'
+      // a few rows of dots per frame, each slice filled on its own, so drawing never stalls a frame
+      await new Promise(done => {
+        let j = -n
+        const slice = () => {
+          if (!alive) return done()
+          const t0 = performance.now()
+          while (j <= n && performance.now() - t0 < 5) {
+            ctx.beginPath()
+            for (let i = -n; i <= n; i++) {
+              const x = c + (i * cos - j * sin) * cell, y = c + (i * sin + j * cos) * cell
+              if ((x - c) ** 2 + (y - c) ** 2 > c * c) continue
+              const l = lum(sample(x, y))
+              // the edge fades in the drawing itself (a CSS mask here cost a 450 ms frame at the pin)
+              const d = Math.hypot(x - c, y - c) / c, fade = d < 0.6 ? 1 : Math.max(0, 1 - (d - 0.6) / 0.4) ** 1.6
+              const r = cell * 0.56 * Math.sqrt(Math.max(0, l - 0.04)) * fade
+              if (r < 0.35) continue
+              ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, Math.PI * 2)
+            }
+            ctx.fill(); j++
+          }
+          if (j <= n) requestAnimationFrame(slice); else done()
+        }
+        slice()
+      })
+      cv.classList.add('is-drawn')
+    }
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting || drawn) return
+      drawn = true; idle(() => draw().catch(() => {}))
+    }, { rootMargin: '120% 0px' })
+    io.observe(cv)
+    return () => { alive = false; io.disconnect() }
+  }, [])
+  return <canvas className="halftone" ref={ref} aria-hidden="true" />
+}
