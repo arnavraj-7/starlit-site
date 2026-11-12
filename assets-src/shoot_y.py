@@ -6,7 +6,7 @@ with sync_playwright() as p:
     b = p.chromium.launch(channel='msedge', args=['--autoplay-policy=no-user-gesture-required', '--enable-gpu', '--ignore-gpu-blocklist'])
     pg = b.new_page(viewport={'width': W, 'height': H})
     errs = []; pg.on('pageerror', lambda e: errs.append(str(e)))
-    pg.goto('http://localhost:4317/', wait_until='networkidle'); pg.wait_for_timeout(4500)
+    pg.goto('http://localhost:4317/', wait_until='networkidle'); pg.wait_for_timeout(int(__import__('os').environ.get('WAIT', '4500')))
     total = pg.evaluate('document.documentElement.scrollHeight - innerHeight')
     for k, y in enumerate(sys.argv[4].split(',')):
         yy = total if y == 'end' else int(y)
