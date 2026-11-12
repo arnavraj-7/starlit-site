@@ -149,14 +149,16 @@ uniform float uTime, uAmt; uniform vec3 uColor; uniform vec2 uHalf; varying vec2
 void main() {
   vec2 q = abs(vP) - uHalf;
   float outside = length(max(q, 0.0)), inside = -min(max(q.x, q.y), 0.0);
-  float rim = outside > 0.0 ? exp(-outside * 70.0) * 0.55 : exp(-inside * 26.0);
-  float Wd = uHalf.x * 2.0, Ht = uHalf.y * 2.0, P = 2.0 * (Wd + Ht), s;
-  if (q.x > q.y) s = vP.x > 0.0 ? Wd + (uHalf.y - vP.y) : 2.0 * Wd + Ht + (vP.y + uHalf.y);
-  else s = vP.y > 0.0 ? vP.x + uHalf.x : Wd + Ht + (uHalf.x - vP.x);
-  s /= P;
+  float rim = outside > 0.0 ? exp(-outside * 70.0) * 0.55 : exp(-inside * 34.0);
+  // Where along the edge this point is, as the angle round the screen's centre (in the screen's
+  // own proportions). Taking the nearest side instead jumped along the corner diagonals, and the
+  // light's tail ended there in hard lines.
+  float s = fract(0.25 - atan(vP.y / uHalf.y, vP.x / uHalf.x) / 6.2831853);
   float h = fract(uTime * 0.09);
   float u1 = fract(h - s), u2 = fract(h + 0.5 - s);
-  float tail = exp(-u1 * 7.0) + exp(-u2 * 7.0), core = exp(-u1 * 60.0) + exp(-u2 * 60.0);
+  // a long tail behind each head and a short soft lead in front of it, so the head has no hard front
+  float tail = exp(-u1 * 7.0) + exp(-u2 * 7.0) + exp(-(1.0 - u1) * 70.0) + exp(-(1.0 - u2) * 70.0);
+  float core = exp(-u1 * 60.0) + exp(-u2 * 60.0) + exp(-(1.0 - u1) * 120.0) + exp(-(1.0 - u2) * 120.0);
   float beat = 1.0 + 0.35 * exp(-fract(uTime * 1.6) * 7.0);
   vec3 c = uColor * rim * (0.1 + 1.5 * tail) * beat + vec3(1.0, 0.95, 0.9) * rim * core * 0.6;
   gl_FragColor = vec4(c * uAmt, 1.0);
