@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
@@ -15,6 +15,7 @@ import './features.css'
 import './chrome.css'
 // From React Bits (reactbits.dev, MIT + Commons Clause): copied in as source.
 import ClickSpark from './bits/ClickSpark.jsx'
+import BuySheet, { PRICE_LABEL } from './Buy.jsx'
 const Laptop3D = lazy(() => import('./Laptop3D.jsx'))
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -156,7 +157,7 @@ function MiniPlayer({ video }) {
   )
 }
 
-function Hero() {
+function Hero({ onBuy }) {
   const root = useRef(null)
   useGSAP(() => {
     const words = gsap.utils.toArray('.hero h1 .w')
@@ -217,11 +218,11 @@ function Hero() {
             <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
-                <a className="btn btn--hero" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
-                <a className="link-down" href="#styles">See the styles <span aria-hidden="true">↓</span></a>
+                <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>
+                <a className="btn btn--hero btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
               </div>
             </ClickSpark>
-            <p className="fineprint">Free · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
+            <p className="fineprint">Pay once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
           </div>
         </div>
       </div>
@@ -790,7 +791,7 @@ function Setup() {
       <div className="wrap setup-grid">
         <div>
           <Sung as="h2" className="h2 sung-scroll" text="Up and running in a minute." />
-          <p className="body">No account, no keys, nothing to connect.</p>
+          <p className="body">No account, nothing to connect.</p>
         </div>
         <ol className="setup">
           <li><h3>Run the installer</h3><p>One small Windows app. Nothing to sign in to.</p></li>
@@ -802,7 +803,7 @@ function Setup() {
   )
 }
 
-function Finale() {
+function Finale({ onBuy }) {
   const root = useRef(null)
   useGSAP(() => {
     ScrollTrigger.create({ trigger: root.current, start: 'top 60%', onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber) })
@@ -818,10 +819,11 @@ function Finale() {
         <Sung as="h2" className="h2" text="Try it with your own music." />
         <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={12} sparkRadius={60} sparkSize={14} glow={0.7} duration={700} style={{ height: 'auto' }}>
           <div className="cta-row">
-            <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>
+            <span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
+            <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
           </div>
         </ClickSpark>
-        <p className="fineprint">Free for Windows 10 and 11. No account needed.</p>
+        <p className="fineprint">Pay once. Windows 10 and 11. No account needed.</p>
       </div>
     </section>
   )
@@ -842,21 +844,25 @@ export default function App() {
   useSmoothScroll()
   useMagnetic()
   useSungHeadings()
+  const [buying, setBuying] = useState(false)
+  const openBuy = () => setBuying(true)
+  const closeBuy = useCallback(() => setBuying(false), [])
   return (
     <>
       <StippleSky />
       <EdgeLight />
       <main>
-        <Hero />
+        <Hero onBuy={openBuy} />
         <Styles />
         <Laptop />
         <Features />
         <Share />
         <Turntable />
         <Setup />
-        <Finale />
+        <Finale onBuy={openBuy} />
       </main>
       <Footer downloadUrl={DOWNLOAD_URL} />
+      <BuySheet open={buying} onClose={closeBuy} downloadUrl={DOWNLOAD_URL} glyph={<WindowsGlyph />} />
     </>
   )
 }
