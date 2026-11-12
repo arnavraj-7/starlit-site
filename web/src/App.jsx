@@ -233,7 +233,7 @@ function Hero() {
   return (
     <section className="hero" id="top" ref={root}>
       <GrooveRecord />
-      <div className="wrap masthead"><span className="brand"><Mark />Starlit</span></div>
+      <div className="wrap masthead"><a className="brand" href="#top" aria-label="Starlit"><Logo /></a></div>
       <div className="wrap" style={{ perspective: '1600px' }}>
         <div className="hero-row">
           <Sung as="h1" text="Every word, the moment it’s sung." />
@@ -265,30 +265,37 @@ function Hero() {
 function Laptop() {
   const root = useRef(null)
   const progress = useRef(0)
-  const [video, setVideo] = useState(null)
   const [near, setNear] = useState(false)
   const [active, setActive] = useState(false)
   useGSAP(() => {
     const steps = gsap.utils.toArray('.laptop-copy .step')
     if (reduceMotion()) { progress.current = 1; return }
+    const q = gsap.utils.selector(root)
     const tl = gsap.timeline({
       defaults: { ease: 'none' },
       scrollTrigger: {
-        trigger: root.current, start: 'top top', end: '+=240%', scrub: true, pin: '.laptop-pin', anticipatePin: 1,
+        trigger: root.current, start: 'top top', end: '+=400%', scrub: true, pin: '.laptop-pin', anticipatePin: 1,
         onEnter: () => setAccent(ACCENT.amber), onEnterBack: () => setAccent(ACCENT.amber),
-        onUpdate: self => {
-          progress.current = self.progress
-          const v = root.current.querySelector('video')
-          if (v) { if (self.progress > 0.38) v.play().catch(() => {}); else v.pause() }
-        },
+        onUpdate: self => { progress.current = self.progress },
       },
     })
     const s0 = sing(steps[0]), s1 = sing(steps[1])
-    tl.to(s0.targets, s0.vars, 0)
-      .to(steps[0], { opacity: 0, y: -30, duration: 0.1 }, 0.36)
-      .fromTo(steps[1], { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.12 }, 0.46)
-      .to(s1.targets, s1.vars, 0.5)
-      .to({}, { duration: 0.4 }, 0.6)
+    // 1. closed, from above
+    tl.to(s0.targets, s0.vars, 0.02)
+      .to(steps[0], { opacity: 0, y: -40, duration: 0.07 }, 0.3)
+    // 3. the word steps out of the screen: the dots run ahead of the letters, so it has depth
+      .fromTo(q('.lw-dots'), { scale: 0.5, opacity: 0 }, { scale: 1.12, opacity: 1, duration: 0.1, ease: 'power2.in' }, 0.575)
+      .fromTo(q('.lw-word'), { scale: 0.5, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.1, ease: 'power2.in' }, 0.575)
+      .fromTo(q('.lw-tag'), { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.04 }, 0.645)
+      .to(q('.laptop-stage canvas'), { opacity: 0.22, duration: 0.06 }, 0.59)
+      .to(q('.lw-dots'), { scale: 1.75, opacity: 0, duration: 0.08, ease: 'power1.in' }, 0.7)
+      .to(q('.lw-word'), { scale: 1.08, opacity: 0, y: '-8vh', duration: 0.07, ease: 'power1.in' }, 0.705)
+      .to(q('.lw-tag'), { opacity: 0, duration: 0.03 }, 0.7)
+      .to(q('.laptop-stage canvas'), { opacity: 1, duration: 0.06 }, 0.72)
+    // 4. pulled back and turned, edge light running
+      .fromTo(steps[1], { opacity: 0, x: -30 }, { opacity: 1, x: 0, duration: 0.05 }, 0.8)
+      .to(s1.targets, s1.vars, 0.82)
+      .set({}, {}, 1)
   }, { scope: root })
   useGSAP(() => {
     // The 3D scene only renders while its section is on screen. Created after the pin above, so
@@ -297,34 +304,71 @@ function Laptop() {
     if (window.__introDone) mount(); else window.addEventListener('starlit:intro-done', mount, { once: true })
     // It is mounted early (above) but only draws frames while the section is actually on screen;
     // on a tall window the early trigger is already active at the top of the page.
-    ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top',
-      onToggle: s => { setActive(s.isActive); if (!s.isActive) { const v = root.current.querySelector('video'); if (v) v.pause() } } })
+    ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top', onToggle: s => setActive(s.isActive) })
     const late = setTimeout(() => setNear(true), 9000)      // whatever happens, it gets mounted
     return () => { clearTimeout(late); window.removeEventListener('starlit:intro-done', mount) }
   }, { scope: root })
+  // the word's halftone: drawn once, when the section is near, then only moved and faded
+  const dots = useRef(null)
+  useEffect(() => { if (near) halftoneWord(dots.current, root.current.querySelector('.lw-word')) }, [near])
   return (
     <section className="laptop-sec" id="screens" ref={root}>
       <div className="laptop-pin">
         <div className="laptop-copy wrap">
           <div className="step">
-            <Sung as="h2" className="h2" text="Got a laptop next to your monitor?" />
-            <p className="body">Starlit uses that screen as well.</p>
+            <Sung as="h2" className="h2" text="Got a laptop too?" />
+            <p className="body">Starlit lights that screen up as well.</p>
           </div>
-          <div className="step">
-            <Sung as="h2" className="h2" text="Each screen gets its own style." />
-            <p className="body">The monitor keeps the album art and the full lyrics. This laptop is running Pulse, which shows one word at a time.</p>
+          <div className="step step--side">
+            <Sung as="h2" className="h2" text="Each screen, its own style." />
+            <p className="body">Full lyrics on the monitor. One word at a time on the laptop.</p>
           </div>
         </div>
         <div className="laptop-stage">
-          {near && <Suspense fallback={null}><Laptop3D progress={progress} video={video} active={active} /></Suspense>}
+          {near && <Suspense fallback={null}><Laptop3D progress={progress} active={active} /></Suspense>}
         </div>
-        <video ref={setVideo} className="hidden-video" src="/media/pulse-laptop.mp4" muted loop playsInline preload="auto" crossOrigin="anonymous" />
+        <div className="laptop-word" aria-hidden="true">
+          <canvas className="lw-dots" ref={dots} />
+          <span className="lw-word">satellites</span>
+          <p className="lw-tag"><b>Pulse</b> just the word being sung</p>
+        </div>
       </div>
     </section>
   )
 }
 
-// The four styles on a drum that turns with the scroll — the Lens style, used as navigation.
+// The escaping word as a field of dots: the letters, blurred, sampled on a grid, each dot as big
+// as the ink under it. One path, filled once.
+async function halftoneWord(cv, word) {
+  if (!cv || !word) return
+  try { await document.fonts.load('800 200px Inter') } catch {}
+  const w = cv.clientWidth, h = cv.clientHeight, dpr = Math.min(devicePixelRatio || 1, 1.5)
+  if (!w || !h) return
+  cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr)
+  const cs = getComputedStyle(word), fs = parseFloat(cs.fontSize)
+  const m = document.createElement('canvas'); m.width = w; m.height = h
+  const g = m.getContext('2d')
+  g.font = `800 ${fs}px Inter, sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'
+  g.letterSpacing = cs.letterSpacing
+  const step = Math.max(7, Math.round(fs / 22))
+  // blurred well past the letters' shapes, so the dots read as the word's light, not a second copy of it
+  g.filter = `blur(${step * 3.2}px)`; g.fillStyle = '#fff'; g.globalAlpha = 0.85; g.fillText(word.textContent, w / 2, h / 2)
+  g.filter = `blur(${step * 9}px)`; g.globalAlpha = 0.7; g.fillText(word.textContent, w / 2, h / 2)
+  const px = g.getImageData(0, 0, w, h).data
+  const x = cv.getContext('2d'); x.setTransform(dpr, 0, 0, dpr, 0, 0)
+  x.fillStyle = '#ffb27a'; x.beginPath()
+  for (let yy = step / 2, j = 0; yy < h; yy += step, j++) {
+    for (let xx = step / 2 + (j % 2) * step / 2; xx < w; xx += step) {
+      const a = px[((yy | 0) * w + (xx | 0)) * 4 + 3] / 255
+      const r = step * 0.5 * Math.sqrt(a) * 1.05
+      if (r < 0.45) continue
+      x.moveTo(xx + r, yy); x.arc(xx, yy, r, 0, Math.PI * 2)
+    }
+  }
+  x.fill()
+}
+
+// The three styles on a drum that turns with the scroll.
 function Styles() {
   const root = useRef(null)
   const frame = useRef(null)
