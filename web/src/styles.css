@@ -538,18 +538,35 @@ main { position: relative; z-index: 1; }
 .share-item h3 { margin: 30px 0 8px; font-size: clamp(1.5rem, 1.7vw, 2.5rem); font-weight: 800; letter-spacing: -.025em; }
 .share-item p { margin: 0; color: var(--mute); max-width: 40ch; line-height: 1.5; font-size: var(--fs-lead); }
 
-/* a phone: titanium edge, black bezel, an island cut-out, side buttons */
-.phone { position: absolute; top: 2%; left: 50%; translate: -50% 0; height: 96%; aspect-ratio: 9 / 19.3; border-radius: 15% / 7.2%; padding: 3.2%;
-  background: linear-gradient(145deg, #4a4d58, #1b1d24 30%, #2c2f39 70%, #565a66);
-  box-shadow: inset 0 0 0 1.5px rgb(255 255 255 / .18), inset 0 0 0 4px #0b0c10, 0 60px 120px -40px rgb(0 0 0 / .95), 0 0 80px -20px rgb(255 160 90 / .25); }
-.phone-screen { position: relative; width: 100%; height: 100%; border-radius: 12.5% / 5.9%; overflow: hidden; background: #000; box-shadow: 0 0 0 2px #050507; }
-.phone-screen img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
-.phone-island { position: absolute; top: 2.2%; left: 50%; translate: -50% 0; width: 31%; height: 3.6%; border-radius: 999px; background: #000;
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .04); }
-.phone-btn { position: absolute; width: 3px; border-radius: 2px; background: linear-gradient(90deg, #5d616e, #2a2c34); }
-.phone-btn--a { left: -3px; top: 17%; height: 5%; }
-.phone-btn--b { left: -3px; top: 25%; height: 9%; }
-.phone-btn--c { right: -3px; top: 22%; height: 13%; }
+/* an iPhone 15 Pro to scale. Body 70.6 x 146.6 mm; per side a 1.1 mm titanium band and a 1.55 mm
+   black border round the 1179 x 2556 screen. The body's parts are in cqw of its width (band 1.6,
+   border 2.2, screen corners 55 pt = 12.9); inside the screen, cqw of the screen's 393 pt
+   (Dynamic Island 126 x 37 pt, 11 pt from the top; status bar; home indicator). */
+.phone { position: absolute; top: 2.5%; left: 50%; translate: -50% 0; height: 95%; aspect-ratio: 70.6 / 146.6; container-type: size;
+  border-radius: 16.7% / 8.05%;
+  background: linear-gradient(155deg, #c4bfb6, #8e8a83 22%, #75716b 55%, #8a867f 80%, #b3aea5);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / .35), inset 0 0 0 2px rgb(0 0 0 / .18), 0 0 0 1px #121212,
+    0 60px 120px -40px rgb(0 0 0 / .95), 0 0 80px -30px rgb(171 156 255 / .22); }
+.phone-glass { position: absolute; inset: 1.6cqw; border-radius: 15.1cqw; background: #030303; box-shadow: 0 0 0 .2cqw rgb(0 0 0 / .8); }
+.phone-screen { position: absolute; inset: 3.8cqw; border-radius: 12.9cqw; overflow: hidden; background: #000; container-type: size; }
+.phone-screen > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.phone-island { position: absolute; top: 2.8cqw; left: 50%; translate: -50% 0; width: 32.06cqw; height: 9.5cqw; border-radius: 999px; background: #000; }
+.phone-island::after { content: ""; position: absolute; right: 3.2cqw; top: 50%; translate: 0 -50%; width: 3.4cqw; height: 3.4cqw; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1b2135 0, #0a0c16 45%, #040406 70%); }
+.phone-home { position: absolute; bottom: 2.04cqw; left: 50%; translate: -50% 0; width: 34.1cqw; height: 1.27cqw; border-radius: 999px; background: rgb(255 255 255 / .92); }
+/* the status bar of a full-screen web app: time left of the island, signal, Wi-Fi and battery right */
+.phone-status { position: absolute; top: 7.55cqw; left: 0; right: 0; translate: 0 -50%; display: flex; justify-content: space-between; color: #fff; pointer-events: none; }
+.phone-time { width: 34cqw; text-align: center; padding-left: 2cqw; font: 600 4.33cqw/1 -apple-system, 'SF Pro Text', 'Inter Variable', 'Segoe UI', sans-serif; letter-spacing: -.01em; }
+.phone-icons { width: 34cqw; display: flex; align-items: center; justify-content: center; gap: 1.5cqw; padding-right: 1cqw; }
+.phone-icons svg { height: 3.05cqw; width: auto; fill: currentColor; }
+.phone-icons svg:last-child { height: 3.3cqw; }
+/* side buttons: Action button and volume on the left, the side button on the right */
+.phone-btn { position: absolute; width: 1.4cqw; background: linear-gradient(90deg, #4a4845, #8e8a84 45%, #5d5b57); }
+.phone-btn--action, .phone-btn--up, .phone-btn--down { left: -.75cqw; border-radius: .6cqw 0 0 .6cqw; }
+.phone-btn--action { top: 17.2%; height: 4.1%; }
+.phone-btn--up { top: 24.6%; height: 6.6%; }
+.phone-btn--down { top: 32.6%; height: 6.6%; }
+.phone-btn--side { right: -.75cqw; top: 26.5%; height: 10.5%; border-radius: 0 .6cqw .6cqw 0; }
 
 /* saved cards, fanned; they spread when pointed at */
 .share-cards img { position: absolute; bottom: 4%; left: 50%; height: 90%; aspect-ratio: 9 / 16; border-radius: 16px; object-fit: cover;

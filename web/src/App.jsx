@@ -515,9 +515,23 @@ function Share() {
         <div className="share-grid">
           <article className="share-item">
             <div className="share-vis share-vis--phone">
-              <div className="phone">
-                <i className="phone-btn phone-btn--a" /><i className="phone-btn phone-btn--b" /><i className="phone-btn phone-btn--c" />
-                <div className="phone-screen"><img src="/media/share/phone.webp" alt="Starlit running on a phone" loading="lazy" /><i className="phone-island" /></div>
+              {/* an iPhone 15 Pro, to scale: 70.6 x 146.6 mm body, 1.55 mm bezel, titanium band */}
+              <div className="phone" role="img" aria-label="Starlit's lyrics full screen on an iPhone">
+                <i className="phone-btn phone-btn--action" /><i className="phone-btn phone-btn--up" /><i className="phone-btn phone-btn--down" /><i className="phone-btn phone-btn--side" />
+                <div className="phone-glass" />
+                <div className="phone-screen">
+                  <img src="/media/share/phone.webp" alt="" loading="lazy" />
+                  <div className="phone-status" aria-hidden="true">
+                    <span className="phone-time">9:41</span>
+                    <span className="phone-icons">
+                      <svg viewBox="0 0 18 12"><rect x="0" y="7.5" width="3" height="4.5" rx=".9" /><rect x="5" y="5.3" width="3" height="6.7" rx=".9" /><rect x="10" y="2.8" width="3" height="9.2" rx=".9" /><rect x="15" y="0" width="3" height="12" rx=".9" /></svg>
+                      <svg viewBox="0 0 16 12"><path d="M8 2.3c2.4 0 4.6.9 6.2 2.5l1.2-1.2A10.4 10.4 0 0 0 8 .6 10.4 10.4 0 0 0 .6 3.6l1.2 1.2A8.7 8.7 0 0 1 8 2.3zM8 5.8c1.4 0 2.7.5 3.7 1.5l1.2-1.2A7 7 0 0 0 8 4.1a7 7 0 0 0-4.9 2l1.2 1.2c1-1 2.3-1.5 3.7-1.5zM8 9.2c.5 0 1 .2 1.3.5L8 11.4 6.7 9.7c.3-.3.8-.5 1.3-.5z" /></svg>
+                      <svg viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.6" fill="none" stroke="currentColor" strokeOpacity=".4" /><rect x="2" y="2" width="16.5" height="9" rx="2.2" /><path d="M25 4.4v4.2c.8-.3 1.4-1.1 1.4-2.1s-.6-1.8-1.4-2.1z" fillOpacity=".4" /></svg>
+                    </span>
+                  </div>
+                  <i className="phone-island" />
+                  <i className="phone-home" />
+                </div>
               </div>
             </div>
             <h3>Your phone is a screen too</h3>
