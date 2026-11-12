@@ -411,9 +411,10 @@ function Monitor({ monRef, matRef }) {
 
 function Halo({ matRef }) {
   const tex = useMemo(dotHaloTexture, [])
+  // well behind the monitor too (its far edge reaches z -4), so the dots never cross either device
   return (
-    <mesh position={[0, 1.3, -3.4]}>
-      <planeGeometry args={[11, 11]} />
+    <mesh position={[0, 1.6, -7.2]} renderOrder={-1}>
+      <planeGeometry args={[14.5, 14.5]} />
       <meshBasicMaterial ref={matRef} map={tex} transparent depthWrite={false} toneMapped={false} blending={THREE.AdditiveBlending} opacity={0.1} />
     </mesh>
   )

@@ -174,7 +174,9 @@ main { position: relative; z-index: 1; }
   background: linear-gradient(var(--ink) 35%, rgb(7 9 18 / 0)); opacity: 0; transition: opacity .3s var(--ease); }
 .laptop-sec.is-pinned .laptop-pin::before { opacity: 1; }
 .laptop-sec { z-index: 3; }
-.laptop-copy { position: absolute; left: 0; right: 0; top: clamp(56px, 8vh, 104px); text-align: center; pointer-events: none; z-index: 2; }
+/* its own inset, not .wrap's: the page gutter at every width, whatever the pin does to its box */
+.laptop-copy { position: absolute; left: var(--gutter); right: var(--gutter); width: auto; max-width: var(--max); margin-inline: auto;
+  top: clamp(56px, 8vh, 104px); text-align: center; pointer-events: none; z-index: 2; }
 .laptop-copy .h2 { font-size: clamp(2rem, 3.3vw, 5.4rem); }
 .laptop-copy .step { position: absolute; left: 0; right: 0; opacity: 0; }
 .laptop-copy .step:first-child { opacity: 1; }
