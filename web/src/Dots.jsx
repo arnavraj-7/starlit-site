@@ -262,6 +262,11 @@ function tonearm(el) {
     return [x, y, Math.hypot(x - 50, y - 50)]
   }
   // a real arm only swings from its rest, down beside the record, in toward the label
+  // groove radii, in the arm's 0-100 units, matching how the worker spaces them
+  const grooveAt = r => {
+    const D = el.clientWidth, fs = Math.max(9, Math.min(13, D / 140)), g = fs * 2.9 / (D / 2) * 50, r0 = 50 * 0.95
+    return r0 - Math.max(0, Math.round((r0 - r) / g)) * g
+  }
   const angleFor = r => { let best = 95, err = 1e9; for (let t = 84; t <= 140; t += 0.1) { const e = Math.abs(stylusAt(t)[2] - r); if (e < err) { err = e; best = t } } return best }
   const REST = 79
   let angle = REST, target = REST, lift = 0.6, liftTarget = 0.6, dragging = false, raf = 0, last = performance.now()
@@ -305,7 +310,7 @@ function tonearm(el) {
     if (!dragging) return
     dragging = false; el.classList.remove('is-lifted')
     const r = stylusAt(angle)[2]
-    if (r < R0 + 0.5 && r > R1) { target = angle; liftTarget = 0 }      // set down right there
+    if (r < R0 + 0.5 && r > R1) { target = angleFor(grooveAt(r)); liftTarget = 0 }   // settles into the nearest groove
     else if (r <= R1) { target = angleFor(R1 + 1.5); liftTarget = 0 }  // on the label: it settles in the last groove
     else { target = REST; liftTarget = 0.6 }                           // off the record: back to its rest
     run()
@@ -314,7 +319,7 @@ function tonearm(el) {
   svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up)
   // once the page has come in, the arm swings over from its rest and sets down on the record
   show()
-  const go = () => { target = angleFor(R0 * 0.82); run(); setTimeout(() => { liftTarget = 0; run() }, 900) }
+  const go = () => { target = angleFor(grooveAt(R0 * 0.82)); run(); setTimeout(() => { liftTarget = 0; run() }, 900) }
   const t0 = setTimeout(go, 2200)
   return () => { clearTimeout(t0); cancelAnimationFrame(raf); svg.removeEventListener('pointerdown', down); svg.removeEventListener('pointermove', move); svg.removeEventListener('pointerup', up); svg.removeEventListener('pointercancel', up) }
 }
