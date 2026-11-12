@@ -158,18 +158,13 @@ function MiniPlayer({ video }) {
 
 function Hero() {
   const root = useRef(null)
-  const frame = useRef(null)
-  const video = useRef(null)
-  useTilt(frame, 4)
   useGSAP(() => {
     const words = gsap.utils.toArray('.hero h1 .w')
-    const v = video.current
     const html = document.documentElement
     const done = () => { window.__introDone = true; window.dispatchEvent(new Event('starlit:intro-done')) }
-    if (reduceMotion()) { html.classList.add('is-in'); v.play().catch(() => {}); done(); return }
+    if (reduceMotion()) { html.classList.add('is-in'); done(); return }
     // The one orchestrated entrance: the sky comes up, each word rises out of its line and is
-    // sung, the screen rises into place — and then the record is put on: the preview starts and
-    // the live tonearm swings over and drops as the platter spins up.
+    // sung. The app's window waits just below, in the styles section (see Styles).
     // It waits until the page has loaded and laid out, so nothing else is competing for frames.
     const tl = gsap.timeline({ paused: true, onComplete: done })
     const loaded = new Promise(r => document.readyState === 'complete' ? r() : addEventListener('load', r, { once: true }))
@@ -184,12 +179,9 @@ function Hero() {
       }
       requestAnimationFrame(f)
     })
-    // Warm-up while still hidden: start and stop the preview once so the video decoder is
-    // ready, and keep the hidden pieces at 0.001 opacity so the browser draws them now, not at
-    // the moment they are revealed.
-    v.play().then(() => { v.pause(); v.currentTime = 0 }).catch(() => {})
-    // Until then the page is plain ink (see html:not(.is-in) in the stylesheet), so the sky, the
-    // name, the headline and the screen all arrive in one move.
+    // The hidden pieces start at 0.001 opacity so the browser draws them now, not at the moment
+    // they are revealed. Until then the page is plain ink (see html:not(.is-in) in the
+    // stylesheet), so the sky, the name and the headline all arrive in one move.
     Promise.all([document.fonts.ready, loaded]).then(calm).then(() => { window.__introAt = performance.now(); performance.mark('starlit-intro'); html.classList.add('is-in'); tl.play() })
     tl.from('.stars', { opacity: 0, duration: 1.4, ease: 'power2.out' }, 0)
       .from('.groove', { opacity: 0, scale: 0.94, rotation: -14, duration: 2.4, ease: 'expo.out' }, 0)
@@ -197,10 +189,7 @@ function Hero() {
       .from('.hero h1 .ww', { yPercent: 55, duration: 1.25, ease: 'power4.out', stagger: 0.055 }, 0.1)
       .from('.hero h1 .ww', { opacity: 0.001, duration: 0.6, ease: 'power1.inOut', stagger: 0.055 }, 0.1)
       .from('.hero-side > *', { opacity: 0.001, y: 18, duration: 1, ease: 'expo.out', stagger: 0.07 }, 0.3)
-      .from('.hero .screen-wrap', { opacity: 0.001, y: 140, scale: 0.94, rotationX: 18, duration: 1.5, ease: 'expo.out' }, 0.35)
       .to(words, { opacity: 1, duration: 0.5, ease: 'power2.out', stagger: 0.1 }, 0.5)
-      .call(() => { v.play().catch(() => {}) }, null, 1.35)
-      .from('.hero .mini', { opacity: 0.001, x: -30, y: 20, scale: 0.94, duration: 1.1, ease: 'expo.out' }, 1.45)
     // While the needle is on the record and the hero is in view, the page's own edge light runs
     // round the visitor's browser window on the beat: Starlit's edge light, on their screen.
     const groove = document.querySelector('.groove')
@@ -208,19 +197,12 @@ function Hero() {
     const sync = () => { window.__edgeHype = !!(heroIn && groove && groove.classList.contains('is-lit')) }
     const mo = groove && new MutationObserver(sync)
     mo && mo.observe(groove, { attributes: true, attributeFilter: ['class'] })
-    ScrollTrigger.create({ trigger: root.current, start: 'top top', end: '70% top', onToggle: st => { heroIn = st.isActive; sync() } })
-    // Scroll: the screen grows toward you, the headline drifts away.
-    gsap.to('.hero .screen-wrap', { scale: 1.07, ease: 'none', force3D: true,
-      scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 75%', end: 'bottom top', scrub: true } })
+    ScrollTrigger.create({ trigger: root.current, start: 'top top', end: 'bottom top', onToggle: st => { heroIn = st.isActive; sync() } })
+    // Scroll: the headline drifts away as the app's window rises over it (Styles).
     gsap.to('.groove', { yPercent: 18, ease: 'none',
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } })
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: '+=190%', scrub: true } })
     gsap.to('.hero-row', { y: -140, opacity: 0.1, ease: 'none', force3D: true,
-      scrollTrigger: { trigger: '.hero', start: 'top top', end: '55% top', scrub: true } })
-    gsap.to('.hero .mini', { y: -60, ease: 'none', force3D: true,
-      scrollTrigger: { trigger: '.hero .screen-wrap', start: 'top 60%', end: 'bottom top', scrub: true } })
-    // The preview only plays while it's on screen.
-    ScrollTrigger.create({ trigger: root.current, start: 'top top', end: 'bottom top',
-      onLeave: () => v.pause(), onEnterBack: () => v.play().catch(() => {}) })
+      scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true } })
     return () => { mo && mo.disconnect(); window.__edgeHype = false }
   }, { scope: root })
   return (
@@ -241,14 +223,6 @@ function Hero() {
             </ClickSpark>
             <p className="fineprint">Free · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
           </div>
-        </div>
-        <div className="screen-wrap">
-          <div className="display-frame" ref={frame}>
-            <video ref={video} src="/media/flow.mp4" poster="/media/flow.jpg" muted loop playsInline preload="auto"
-              aria-label="Starlit on a monitor: the album on a turntable beside scrolling lyrics" />
-            <TurntableLive video={video} cover="/media/covers/a.webp" songStart={22} />
-          </div>
-          <MiniPlayer video={video} />
         </div>
       </div>
     </section>
