@@ -62,8 +62,9 @@ export default function TurntableScene({ progress, cover }) {
 
   return (
     <div className="tt-stack" aria-hidden="true">
-      <div className="tt-live tt-scene" ref={root}><TurntableParts cover={cover} sleeve={cover} /></div>
-      <div className="np-card glass">
+      {/* the app's album card: the record player inside it, the song and the controls below */}
+      <div className="np-card">
+        <div className="tt-live tt-scene" ref={root}><TurntableParts cover={cover} sleeve={cover} /></div>
         <div className="np-eyebrow"><span className="eq"><i /><i /><i /><i /></span>Now playing</div>
         <div className="np-title">Slow Satellites</div>
         <div className="np-artist">Ivo Marin</div>

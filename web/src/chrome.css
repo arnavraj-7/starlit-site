@@ -1,6 +1,8 @@
 /* ---------- turntable scene ---------- */
-.tt-stack { justify-self: center; width: min(560px, 100%, 42vh); display: grid; gap: clamp(12px, 1.8vh, 22px); container-type: inline-size; }
-.tt-live.tt-scene { position: relative; left: auto; top: auto; width: 100%; border-radius: 7%; }
+.tt-stack { justify-self: center; width: min(560px, 100%, 42vh); container-type: inline-size; }
+/* The record player stands on the album card itself (the card is its plinth): no tile of its own.
+   Proportions are the app's at 2560 wide: a 640 px card, 28 px padding, the art inset 12 px round. */
+.tt-live.tt-scene { position: relative; left: auto; top: auto; width: 100%; border-radius: 1.9cqw; background: none; box-shadow: none; }
 .tt-live .tt-carrier { will-change: transform, opacity; }
 /* the album jacket: card with thickness, tilted toward you, casting a soft shadow on the deck */
 .tt-live .tt-sleeve {
@@ -26,18 +28,27 @@
 /* the record: a rim of light on its edge and a shadow that spreads as it is lifted off */
 .tt-live .tt-carrier { --lift: 0; box-shadow: 0 calc(.7cqw + 2.4cqw * var(--lift)) calc(1.8cqw + 4cqw * var(--lift)) rgb(0 0 0 / calc(.55 - .15 * var(--lift))),
   inset 0 0 0 .25cqw rgb(255 255 255 / .05); }
-.np-card { border-radius: 9cqw; padding: 5.5cqw 6cqw 5cqw; background: linear-gradient(180deg, rgb(255 255 255 / .09), rgb(255 255 255 / .03)), color-mix(in srgb, var(--accent) 7%, rgb(14 14 18 / .86)); }
-.np-eyebrow { display: flex; align-items: center; gap: 1.6cqw; font-size: 2.6cqw; font-weight: 700; letter-spacing: .02em; color: var(--accent); }
-.np-eyebrow .eq { height: 2.4cqw; }
-.np-title { font-size: 7.6cqw; font-weight: 800; letter-spacing: -.025em; line-height: 1.15; margin-top: 1cqw; }
-.np-artist { font-size: 3.6cqw; font-weight: 600; color: var(--accent); }
-.np-bar { height: .9cqw; border-radius: 1cqw; background: rgb(255 255 255 / .1); margin-top: 4.4cqw; overflow: hidden; }
-.np-fill { display: block; height: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(.04); }
-.np-times { display: flex; justify-content: space-between; font-size: 2.3cqw; color: var(--mute); margin-top: 1.4cqw; font-variant-numeric: tabular-nums; }
-.np-transport { display: flex; justify-content: center; align-items: center; gap: 4cqw; margin-top: 2cqw; }
-.np-btn { width: 10.5cqw; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; background: rgb(255 255 255 / .08); box-shadow: inset 0 1px 0 rgb(255 255 255 / .3), inset 0 0 0 1px rgb(255 255 255 / .08); }
-.np-btn svg { width: 38%; }
-.np-btn--play { width: 15cqw; background: radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--accent) 60%, transparent), color-mix(in srgb, var(--accent) 18%, transparent) 72%); box-shadow: inset 1.5px 1.5px 1px rgb(255 255 255 / .4), inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent), 0 0 6cqw -1cqw var(--glow); }
+.np-card { position: relative; border-radius: 6.25cqw; padding: 4.4cqw 4.4cqw 5.3cqw; color: var(--paper);
+  background: linear-gradient(168deg, rgb(255 255 255 / .055), transparent 38%), color-mix(in srgb, var(--accent) 6%, #121216);   /* opaque: the app frosts what is behind it, and dots through the card read as noise */
+  box-shadow: inset 1px 1.5px .5px rgb(255 255 255 / .5), inset -1px -1.5px .5px rgb(255 255 255 / .18), inset 0 0 0 1px rgb(255 255 255 / .075),
+    inset 0 14px 20px -16px rgb(255 255 255 / .3), 0 6cqw 14cqw -4cqw rgb(0 0 0 / .75); }
+.np-eyebrow { display: flex; align-items: center; gap: 1.6cqw; margin-top: 4.4cqw; font-size: 2.2cqw; line-height: 1.3; font-weight: 600; letter-spacing: .01em; color: var(--mute); }
+.np-eyebrow .eq { height: 1.9cqw; gap: .3cqw; color: var(--accent); }
+.np-eyebrow .eq i { width: .47cqw; }
+.np-title { font-size: 8.8cqw; font-weight: 800; letter-spacing: -.025em; line-height: 1.05; margin-top: .9cqw; }
+.np-artist { font-size: 4.4cqw; font-weight: 600; line-height: 1.2; color: var(--accent); margin-top: .6cqw; }
+/* a thin neutral track */
+.np-bar { height: .625cqw; border-radius: 1cqw; background: rgb(255 255 255 / .13); margin-top: 5.3cqw; overflow: hidden; }
+.np-fill { display: block; height: 100%; background: rgb(238 240 248 / .88); transform-origin: 0 50%; transform: scaleX(.04); }
+.np-times { display: flex; justify-content: space-between; font-size: 2.35cqw; font-weight: 600; line-height: 1.33; color: var(--mute); margin-top: 1.9cqw; font-variant-numeric: tabular-nums; }
+.np-times span + span { color: var(--dim); }
+/* plain glyphs, and play/pause the one solid control */
+.np-transport { display: flex; justify-content: center; align-items: center; gap: 6.9cqw; margin-top: 2.2cqw; }
+.np-btn { width: 10cqw; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; }
+.np-btn svg { width: 44%; }
+.np-btn--play { width: 11.9cqw; color: var(--ink); background: var(--paper);
+  box-shadow: 0 1px 2px rgb(0 0 0 / .3), 0 1.25cqw 3.4cqw -1cqw rgb(0 0 0 / .55), inset 0 -2px 0 rgb(0 0 0 / .08); }
+.np-btn--play svg { width: 39%; }
 
 /* ---------- finale ---------- */
 .finale > .wrap::before { content: ''; position: absolute; inset: -14% -4%; z-index: -1; background: radial-gradient(closest-side, rgb(7 9 18 / .5), rgb(7 9 18 / .22) 60%, transparent); pointer-events: none; }
