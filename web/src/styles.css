@@ -45,7 +45,7 @@
 }
 /* Before the intro starts the page is plain ink, so everything arrives together. */
 html:not(.is-in) .hero h1 { opacity: .001; }
-html:not(.is-in) .nebula, html:not(.is-in) .edge-light { opacity: 0; }
+html:not(.is-in) .edge-light { opacity: 0; }
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; background: var(--ink); }
@@ -68,6 +68,9 @@ a { color: inherit; }
 /* ---------- atmosphere ---------- */
 .stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
 .stars canvas { position: absolute; left: 0; top: 0; will-change: transform; }
+/* the intro fades .stars itself, so the drawn-in fade is on the canvases */
+.stars canvas:not(.twinkle) { opacity: 0; transition: opacity 1.4s var(--ease); }
+.stars.is-drawn canvas { opacity: 1; }
 .stars .twinkle { animation: twinkle 5s ease-in-out infinite alternate; }
 @keyframes twinkle { from { opacity: 1; } to { opacity: .45; } }
 @media (prefers-reduced-motion: reduce) { .stars .twinkle { animation: none; } }
@@ -81,8 +84,6 @@ main { position: relative; z-index: 1; }
 .plate-img { position: absolute; inset: -8%; background-size: cover; background-position: center;
   mix-blend-mode: luminosity; opacity: .9; }
 .plate::after { content: ''; position: absolute; inset: 0; }
-.plate--nebula { height: 120vh; }
-.plate--nebula::after { background: linear-gradient(180deg, rgb(7 9 18 / .55), rgb(7 9 18 / .35) 40%, var(--ink) 96%); }
 .plate--grooves::after { background: radial-gradient(70% 80% at 30% 50%, rgb(7 9 18 / .2), rgb(7 9 18 / .85) 70%), linear-gradient(180deg, var(--ink), transparent 18%, transparent 82%, var(--ink)); }
 .plate--stage .plate-img { opacity: .75; }
 .plate--stage::after { background: linear-gradient(180deg, var(--ink) 2%, rgb(7 9 18 / .25) 45%, rgb(7 9 18 / .7) 85%, var(--ink)); }
@@ -282,35 +283,22 @@ main { position: relative; z-index: 1; }
 
 
 /* ---------- coded backdrops (crisp at any resolution) ---------- */
-.nebula { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; opacity: 0; transition: opacity 2.2s var(--ease); }
-.nebula.is-ready { opacity: 1; }
-.plate--grooves { -webkit-mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 82%, transparent); }
-.grooves { position: absolute; inset: 0; width: 100%; height: 100%; }
-.groove-sheen { position: absolute; left: 50%; top: 50%; width: 60vmax; aspect-ratio: 1; margin: -30vmax 0 0 -30vmax; border-radius: 50%; pointer-events: none; will-change: transform;
-  scale: 3.6;                    /* soft light: drawn small, enlarged by the GPU */
-  background: conic-gradient(from 0deg, transparent 0 40deg, color-mix(in srgb, var(--accent) 14%, transparent) 58deg, transparent 80deg 200deg, rgb(255 255 255 / .05) 220deg, transparent 245deg); }
 .plate--grooves::after { background: radial-gradient(70% 70% at 70% 50%, rgb(7 9 18 / .85), transparent 75%); }
-.stage-lights { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 0;
-  -webkit-mask-image: linear-gradient(180deg, transparent, #000 12%, #000 74%, transparent);
-          mask-image: linear-gradient(180deg, transparent, #000 12%, #000 74%, transparent); }
-/* The lamps hang well above the section, so what you see is already a wide shaft; each side beam
-   is aimed at the button whatever the window's shape (atan2 of the offsets across and down). */
-.beam-arm { position: absolute; top: -38%; width: 0; height: 0; transform-origin: 0 0; }
-.beam { --r: calc(var(--side) * atan2(38vw, 82vh));
-  position: absolute; left: -15vmax; top: 0; width: 30vmax; height: 30vmax; transform-origin: 50% 0; will-change: transform;
-  transform: rotate(var(--r)) scale(4.2);
-  background: conic-gradient(from calc(180deg - var(--w) / 2) at 50% 0%, transparent 0deg, color-mix(in srgb, var(--c) var(--amt), transparent) calc(var(--w) / 2), transparent var(--w), transparent 360deg);
-  -webkit-mask-image: radial-gradient(circle at 50% 0%, #000 8%, rgb(0 0 0 / .55) 34%, transparent 62%);
-          mask-image: radial-gradient(circle at 50% 0%, #000 8%, rgb(0 0 0 / .55) 34%, transparent 62%);
-  animation: sway var(--t) ease-in-out infinite alternate; animation-play-state: paused; }
-.finale.in-view .beam { animation-play-state: running; }
-@keyframes sway {
-  from { transform: rotate(calc(var(--r) - 2deg)) scale(4.2); }
-  to { transform: rotate(calc(var(--r) + 2deg)) scale(4.2); }
-}
-.pool { position: absolute; left: 50%; top: 61%; width: min(1500px, 92vw); height: 44vh; translate: -50% -50%;
-  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 17%, transparent), color-mix(in srgb, var(--accent) 6%, transparent) 55%, transparent); }
-@media (prefers-reduced-motion: reduce) { .beam { animation: none; } }
+.plate--grooves { inset: -35vh 0; -webkit-mask-image: linear-gradient(180deg, transparent, #000 30vh, #000 calc(100% - 30vh), transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 30vh, #000 calc(100% - 30vh), transparent); }
+/* halftone record behind the record player scene: a poster print, low and warm */
+.halftone { position: absolute; z-index: -1; left: 27%; top: 50%; width: min(118vh, 74vw); aspect-ratio: 1; translate: -50% -50%;
+  pointer-events: none; opacity: 0; transition: opacity 1.2s var(--ease); will-change: transform; }
+.halftone.is-drawn { opacity: .42; }
+/* the record player made of lyrics, behind the closing line */
+.ascii { position: absolute; left: 0; right: 0; bottom: 0; height: min(78vh, 62vw); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s var(--ease);
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent); mask-image: linear-gradient(180deg, transparent, #000 14%, #000 82%, transparent); }
+.ascii.is-drawn { opacity: 1; }
+.ascii canvas { position: absolute; left: 0; width: 100%; }
+.ascii-dim { top: 0; height: 100%; }
+.ascii-lit { opacity: 0; }
+.no-motion .ascii-lit { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .ascii-lit { opacity: 1; } }
 
 /* ---------- 3D laptop stage ---------- */
 .laptop-pin { position: relative; }
