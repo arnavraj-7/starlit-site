@@ -245,7 +245,8 @@ function Hero({ onBuy }) {
     // sung. The app's window waits just below, in the styles section (see Styles).
     // It waits until the page has loaded and laid out, so nothing else is competing for frames.
     const tl = gsap.timeline({ paused: true, onComplete: done })
-    const loaded = new Promise(r => document.readyState === 'complete' ? r() : addEventListener('load', r, { once: true }))
+    // On a slow connection 'load' can be seconds away (images further down); the headline doesn't wait past 1 s.
+    const loaded = Promise.race([new Promise(r => document.readyState === 'complete' ? r() : addEventListener('load', r, { once: true })), new Promise(r => setTimeout(r, 1000))])
     // ...and then until the browser has had 150 ms of unbroken short frames (load-time layout and
     // first paint can stall for hundreds of ms; starting inside that made the intro jump).
     const calm = () => new Promise(res => {
@@ -253,7 +254,7 @@ function Hero({ onBuy }) {
       const f = now => {
         const d = now - last; last = now
         quiet = d < 24 ? quiet + d : 0
-        if (quiet >= 150 || now - t0 > 3000) res(); else requestAnimationFrame(f)
+        if (quiet >= 150 || now - t0 > (lite ? 600 : 1200)) res(); else requestAnimationFrame(f)    // a slow machine never gets calm; it waits 1.2 s at most
       }
       requestAnimationFrame(f)
     })
