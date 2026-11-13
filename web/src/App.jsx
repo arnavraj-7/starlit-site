@@ -929,8 +929,23 @@ function useSungHeadings() {
   })
 }
 
+// When the page's height changes after the triggers were measured (late fonts, a section switching
+// layout), measure again; otherwise triggers further down fire at the wrong scroll positions.
+function useRemeasure() {
+  useEffect(() => {
+    let h = document.documentElement.scrollHeight, t = 0
+    const ro = new ResizeObserver(() => {
+      clearTimeout(t)
+      t = setTimeout(() => { const n = document.documentElement.scrollHeight; if (Math.abs(n - h) > 2) { h = n; ScrollTrigger.refresh() } }, 250)
+    })
+    ro.observe(document.body)
+    return () => { ro.disconnect(); clearTimeout(t) }
+  }, [])
+}
+
 export default function App() {
   useSmoothScroll()
+  useRemeasure()
   useMagnetic()
   useSungHeadings()
   const [buying, setBuying] = useState(false)
