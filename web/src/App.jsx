@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
 import Lenis from 'lenis'
 import 'lenis/dist/lenis.css'
+import { lite, small, videoSrc, posterSrc, warm, afterIntro, whenNear } from './media.js'
 import EdgeLight from './EdgeLight.jsx'
 import { StippleSky, HalftoneRecord, GrooveRecord, NeedleLine } from './Dots.jsx'
 import TurntableScene from './TurntableScene.jsx'
@@ -33,11 +34,11 @@ const DOWNLOAD_URL = 'https://github.com/arnavraj-7/starlit-releases/releases/la
 const ACCENT = { violet: '#ab9cff', amber: '#ffaa6a', teal: '#4fe3cf' }
 
 const STYLES = [
-  { id: 'flow', name: 'Flow', accent: ACCENT.violet, video: '/media/flow.mp4', poster: '/media/flow.jpg',
+  { id: 'flow', name: 'Flow', accent: ACCENT.violet, media: '/media/flow',
     text: 'The whole lyric sheet scrolls past. The line being sung is sharp, and the others blur the further away they are.' },
-  { id: 'constellation', name: 'Constellation', accent: ACCENT.teal, video: '/media/constellation.mp4', poster: '/media/constellation.jpg',
+  { id: 'constellation', name: 'Constellation', accent: ACCENT.teal, media: '/media/constellation',
     text: 'Each word is a star. A line joins up into a shape like the Big Dipper or Cassiopeia, then the next one starts somewhere else. It looks best on a second screen.' },
-  { id: 'pulse', name: 'Pulse', accent: ACCENT.amber, video: '/media/pulse.mp4', poster: '/media/pulse.jpg',
+  { id: 'pulse', name: 'Pulse', accent: ACCENT.amber, media: '/media/pulse',
     text: 'Only the word being sung, as big as the screen allows, with the rest of the line small underneath.' },
 ]
 
@@ -212,6 +213,7 @@ function MiniPlayer({ video }) {
   }, [video])
   const toggle = () => {
     const v = video.current
+    v.dataset.asked = '1'
     if (v.paused) v.play(); else v.pause()
   }
   return (
@@ -339,8 +341,10 @@ function Laptop() {
   useGSAP(() => {
     // The 3D scene only renders while its section is on screen. Created after the pin above, so
     // its end includes the pinned scroll distance. Its code is fetched once the intro has played.
+    // Phones and light setups fetch it (a 270 kB chunk) only when the section is a screen and a half away.
     const mount = () => (window.requestIdleCallback || setTimeout)(() => setNear(true), { timeout: 1500 })
-    if (window.__introDone) mount(); else window.addEventListener('starlit:intro-done', mount, { once: true })
+    const unNear = (lite || small) ? whenNear(root.current, () => setNear(true), '150% 0px') : null
+    if (unNear) { /* waits for the scroll */ } else if (window.__introDone) mount(); else window.addEventListener('starlit:intro-done', mount, { once: true })
     // It is mounted early (above) but only draws frames while the section is actually on screen;
     // on a tall window the early trigger is already active at the top of the page.
     // Arriving, the laptop rises out of the dark and fades in (entry, also read by the 3D scene);
@@ -356,8 +360,8 @@ function Laptop() {
     }
     ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top', onToggle: s => setActive(s.isActive),
       onUpdate: ends, onRefresh: ends })
-    const late = setTimeout(() => setNear(true), 9000)      // whatever happens, it gets mounted
-    return () => { clearTimeout(late); window.removeEventListener('starlit:intro-done', mount) }
+    const late = unNear ? 0 : setTimeout(() => setNear(true), 9000)      // whatever happens, it gets mounted
+    return () => { clearTimeout(late); unNear && unNear(); window.removeEventListener('starlit:intro-done', mount) }
   }, { scope: root })
   // the word's halftone: drawn once, when the section is near, then only moved and faded
   const dots = useRef(null)
@@ -443,18 +447,26 @@ function Styles() {
   }
   useTilt(frame, 3)
   useEffect(() => { root.current.style.setProperty('--accent', STYLES[active].accent) }, [active])
-  // Nothing plays until the hero's entrance has finished. Before that, the Flow recording is
-  // started and stopped once while still hidden, so its decoder is ready.
+  // Nothing is fetched or played until the hero's entrance has finished (the videos are
+  // preload="none"; until then the posters stand in). Then the Flow recording is fetched and
+  // started and stopped once while still off screen, so its decoder is ready when the window rises.
+  // On a slow connection or a small machine the posters stay and only the play button fetches.
+  const onScreenRef = useRef(false)
   useEffect(() => {
-    const v = flow.current
-    if (v) v.play().then(() => { if (!readyRef.current) { v.pause(); v.currentTime = 0 } }).catch(() => {})
     const go = () => { readyRef.current = true; setReady(true) }
     if (window.__introDone) go(); else window.addEventListener('starlit:intro-done', go, { once: true })
-    return () => window.removeEventListener('starlit:intro-done', go)
+    const stop = lite ? null : afterIntro(() => {
+      const v = flow.current
+      if (!v) return
+      v.preload = 'auto'
+      v.play().then(() => { if (!onScreenRef.current) { v.pause(); v.currentTime = 0 } }).catch(() => {})
+    })
+    return () => { window.removeEventListener('starlit:intro-done', go); stop && stop() }
   }, [])
   useEffect(() => {
+    onScreenRef.current = onScreen
     if (!ready) return
-    videos.current.forEach((v, i) => { if (!v) return; if (i === active && onScreen) v.play().catch(() => {}); else v.pause() })
+    videos.current.forEach((v, i) => { if (!v) return; if (i === active && onScreen && (!lite || v.dataset.asked)) v.play().catch(() => {}); else v.pause() })
   }, [active, onScreen, ready])
   useGSAP(() => {
     const items = gsap.utils.toArray('.drum-item')
@@ -516,10 +528,11 @@ function Styles() {
   }, { scope: root })
   const warmed = useRef(false)
   useEffect(() => {
-    if (!onScreen || !ready || warmed.current) return
+    if (!onScreen || !ready || warmed.current || lite) return
     warmed.current = true
     const timers = videos.current.slice(1).map((v, k) => setTimeout(() => {
       if (!v || !v.paused || v.currentTime > 0) return
+      v.preload = 'metadata'           // just the start, to wake the decoder; the rest comes when it's chosen
       v.play().then(() => { if (!v.classList.contains('is-on')) { v.pause(); v.currentTime = 0 } }).catch(() => {})
     }, 500 + k * 450))
     return () => timers.forEach(clearTimeout)
@@ -535,8 +548,8 @@ function Styles() {
               <div className="display-frame" ref={frame}>
                 <div className="sizer" />
                 {STYLES.map((s, i) => (
-                  <video key={s.id} ref={el => { videos.current[i] = el; if (i === 0) flow.current = el }} className={i === active ? 'is-on' : ''} src={s.video} poster={s.poster}
-                    muted loop playsInline preload={i === 0 ? 'auto' : 'metadata'}
+                  <video key={s.id} ref={el => { videos.current[i] = el; if (i === 0) flow.current = el }} className={i === active ? 'is-on' : ''} src={videoSrc(s.media)} poster={posterSrc(s.media)}
+                    muted loop playsInline preload="none"
                     aria-label={i === 0 ? 'Starlit in the Flow style: the album on a turntable beside scrolling lyrics' : `The ${s.name} style`} />
                 ))}
                 {/* the turntable in the Flow recording, live: pausing really lifts the arm */}

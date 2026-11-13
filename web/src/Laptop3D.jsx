@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { RoundedBox, Environment, Lightformer, ContactShadows } from '@react-three/drei'
 import * as THREE from 'three'
+import { lite, videoSrc, posterSrc } from './media.js'
 
 // A laptop in real 3D for the "two screens" scene, played by the scroll (progress, 0..1) as one
 // camera move in three beats:
@@ -254,7 +255,7 @@ function Model({ progress, entry, pointer, haloRef, active }) {
     const v = document.createElement('video')
     v.muted = true; v.loop = true; v.playsInline = true; v.crossOrigin = 'anonymous'; v.preload = 'none'
     const tex = new THREE.VideoTexture(v); tex.colorSpace = THREE.SRGBColorSpace
-    const poster = new THREE.TextureLoader().load('/media/flow.jpg'); poster.colorSpace = THREE.SRGBColorSpace
+    const poster = new THREE.TextureLoader().load(posterSrc('/media/flow')); poster.colorSpace = THREE.SRGBColorSpace
     return { v, tex, poster, live: false, wanted: false }
   }, [])
   useEffect(() => {
@@ -318,7 +319,8 @@ function Model({ progress, entry, pointer, haloRef, active }) {
       const mm = monMat.current, want = rise > 0.002
       if (want !== flow.wanted) {
         flow.wanted = want
-        if (want) { if (!flow.v.src) { flow.v.src = '/media/flow.mp4'; flow.v.preload = 'auto' } flow.v.play().catch(() => {}) } else flow.v.pause()
+        // the same recording as the styles window (cached by then); a light setup keeps the poster
+        if (want && !lite) { if (!flow.v.src) { flow.v.src = videoSrc('/media/flow'); flow.v.preload = 'auto' } flow.v.play().catch(() => {}) } else flow.v.pause()
       }
       const map = flow.live ? flow.tex : flow.poster
       if (mm.map !== map) { mm.map = map; mm.needsUpdate = true }

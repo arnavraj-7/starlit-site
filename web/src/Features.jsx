@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useGSAP } from '@gsap/react'
+import { lite, videoSrc, posterSrc, whenNear } from './media.js'
 
 // What it does, one thing per screen: the words on the left, the app doing it on the right.
 const FEATURES = [
@@ -13,14 +14,15 @@ const FEATURES = [
 // Each feature is shown by the app itself: a short clip recorded from Starlit (assets-src, the
 // same off-screen capture as the styles footage) at /media/feat/<id>.mp4. Until a clip exists its
 // slot stays empty and the words carry the screen on their own.
-function Clip({ id, on }) {
+// preload="none" until the section is a screen away; on a light connection the poster stays.
+function Clip({ id, on, near }) {
   const ref = useRef(null)
   const [ok, setOk] = useState(true)
-  useEffect(() => { const v = ref.current; if (!v) return; if (on) v.play().catch(() => {}); else v.pause() }, [on])
+  useEffect(() => { const v = ref.current; if (!v) return; if (on && !lite) v.play().catch(() => {}); else v.pause() }, [on])
   if (!ok) return null
   return (
     <div className={`feat-clip ${on ? 'is-on' : ''}`}>
-      <video ref={ref} src={`/media/feat/${id}.mp4`} poster={`/media/feat/${id}.jpg`} muted loop playsInline preload="metadata"
+      <video ref={ref} src={videoSrc(`/media/feat/${id}`)} poster={posterSrc(`/media/feat/${id}`)} muted loop playsInline preload={near && !lite ? 'auto' : 'none'}
         onError={() => setOk(false)} aria-hidden="true" />
     </div>
   )
@@ -30,7 +32,11 @@ export default function Features() {
   const root = useRef(null)
   const [inView, setInView] = useState(false)
   const [active, setActive] = useState(0)
-  const [big, setBig] = useState(true)
+  // decided before the first render: rendering the big layout first on a phone fetched three clips
+  // and changed the page's height after the triggers below it were measured
+  const [big, setBig] = useState(() => matchMedia('(min-width: 861px) and (prefers-reduced-motion: no-preference)').matches)
+  const [near, setNear] = useState(false)
+  useEffect(() => big ? whenNear(root.current, () => setNear(true), '100% 0px') : undefined, [big])
   useEffect(() => {
     const q = matchMedia('(min-width: 861px) and (prefers-reduced-motion: no-preference)')
     const on = () => setBig(q.matches); on(); q.addEventListener('change', on)
@@ -70,7 +76,7 @@ export default function Features() {
   return (
     <section className="features" id="details" ref={root}>
       <div className="feat-pin">
-        <div className="feat-clips">{FEATURES.map((f, i) => <Clip key={f.id} id={f.id} on={inView && i === active} />)}</div>
+        <div className="feat-clips">{FEATURES.map((f, i) => <Clip key={f.id} id={f.id} on={inView && i === active} near={near} />)}</div>
         <div className="feat-copy wrap">
           <div className="feat-count" aria-hidden="true"><b>{String(active + 1).padStart(2, '0')}</b> / {String(FEATURES.length).padStart(2, '0')}</div>
           {FEATURES.map((f, i) => (
