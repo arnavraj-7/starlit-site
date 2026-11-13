@@ -19,6 +19,9 @@ import BuySheet, { PRICE_LABEL } from './Buy.jsx'
 // Buying goes live once Razorpay's keys are on Vercel (VITE_SALES_OPEN=1 at build time); until
 // then the download is the only action and the free trial covers everyone.
 const SALES_OPEN = import.meta.env.VITE_SALES_OPEN === '1'
+// Until then, buying is by hand: UPI, a screenshot, a key back.
+const loadManualBuy = () => import('./ManualBuy.jsx')
+const ManualBuySheet = lazy(loadManualBuy)
 const Laptop3D = lazy(() => import('./Laptop3D.jsx'))
 
 gsap.registerPlugin(ScrollTrigger, useGSAP)
@@ -221,8 +224,8 @@ function Hero({ onBuy }) {
             <NeedleLine />
             <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
               <div className="cta-row">
-                {SALES_OPEN && <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>}
-                <a className={`btn btn--hero${SALES_OPEN ? ' btn--alt' : ''}`} href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
+                <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>
+                <a className="btn btn--hero btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
               </div>
             </ClickSpark>
             <p className="fineprint">Free for 3 days, then ₹599 once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
@@ -822,10 +825,8 @@ function Finale({ onBuy }) {
         <Sung as="h2" className="h2" text="Try it with your own music." />
         <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={12} sparkRadius={60} sparkSize={14} glow={0.7} duration={700} style={{ height: 'auto' }}>
           <div className="cta-row">
-            {SALES_OPEN
-              ? <><span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
-                  <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></>
-              : <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>}
+            <span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
+            <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
           </div>
         </ClickSpark>
         <p className="fineprint">Free for 3 days, then ₹599 once. Windows 10 and 11. No account needed.</p>
@@ -851,7 +852,19 @@ export default function App() {
   useSungHeadings()
   const [buying, setBuying] = useState(false)
   const openBuy = () => setBuying(true)
-  const closeBuy = useCallback(() => setBuying(false), [])
+  // /#buy opens the purchase sheet (the app links there); closing it clears the hash.
+  const closeBuy = useCallback(() => {
+    setBuying(false)
+    if (location.hash === '#buy') history.replaceState(history.state, '', location.pathname + location.search)
+  }, [])
+  useEffect(() => {
+    const fromHash = () => { if (location.hash === '#buy') setBuying(true) }
+    fromHash()
+    addEventListener('hashchange', fromHash)
+    // fetch the manual sheet (and its QR code) ahead of the first click
+    const t = SALES_OPEN ? 0 : setTimeout(() => loadManualBuy().catch(() => {}), 2500)
+    return () => { removeEventListener('hashchange', fromHash); clearTimeout(t) }
+  }, [])
   return (
     <>
       <StippleSky />
@@ -867,7 +880,9 @@ export default function App() {
         <Finale onBuy={openBuy} />
       </main>
       <Footer downloadUrl={DOWNLOAD_URL} />
-      <BuySheet open={buying} onClose={closeBuy} downloadUrl={DOWNLOAD_URL} glyph={<WindowsGlyph />} />
+      {SALES_OPEN
+        ? <BuySheet open={buying} onClose={closeBuy} downloadUrl={DOWNLOAD_URL} glyph={<WindowsGlyph />} />
+        : buying && <Suspense fallback={null}><ManualBuySheet open onClose={closeBuy} /></Suspense>}
     </>
   )
 }
