@@ -75,3 +75,39 @@ html.buy-open { overflow: hidden; }
 
 .buy-spin { display: inline-block; width: 1em; height: 1em; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; animation: buy-spin .7s linear infinite; }
 @keyframes buy-spin { to { transform: rotate(1turn); } }
+
+/* ---------- the manual purchase sheet: pay by UPI, send the screenshot, get a key ---------- */
+.buy.mb { width: min(100%, clamp(420px, 25vw, 580px)); }
+.buy.mb:focus { outline: none; }
+.mb .buy-line { margin-bottom: 1.4em; }
+.mb-steps { list-style: none; margin: 0; padding: 0; counter-reset: mb; }
+.mb-steps > li { position: relative; counter-increment: mb; padding: 0 0 1.5em 2.6em; }
+.mb-steps > li:last-child { padding-bottom: .2em; }
+.mb-steps > li::before { content: counter(mb); position: absolute; left: 0; top: -.05em; display: grid; place-items: center; width: 1.75em; height: 1.75em;
+  border-radius: 50%; font-size: .85em; font-weight: 700; font-variant-numeric: tabular-nums; color: #ffd2a8;
+  background: rgb(255 170 106 / .1); box-shadow: inset 0 0 0 1px rgb(255 170 106 / .32); }
+.mb-steps > li:not(:last-child)::after { content: ''; position: absolute; left: calc(.875em * .85 - .5px); top: 1.75em; bottom: .3em; width: 1px;
+  background: linear-gradient(rgb(255 170 106 / .3), rgb(255 255 255 / .06)); }
+.mb-steps h3 { margin: 0 0 .75em; font-size: 1em; font-weight: 700; letter-spacing: -.005em; line-height: 1.35; }
+.mb-muted { margin: .7em 0 0; font-size: .87em; color: var(--quiet); text-wrap: pretty; }
+.mb-steps h3 + .mb-muted { margin-top: -.35em; }
+
+.mb-qr-tile { width: fit-content; padding: 0; border-radius: .9em; overflow: hidden; background: #fff; line-height: 0;
+  box-shadow: 0 0 0 1px rgb(255 255 255 / .1), 0 18px 50px -18px rgb(255 170 106 / .35); }
+.mb-qr { display: block; max-width: 100%; height: auto; }
+@media (max-height: 860px) { .mb-qr { width: 180px; } }   /* still four whole pixels a module */
+
+.mb-upi { display: flex; align-items: center; gap: .6em; margin-top: .85em; min-width: 0; }
+.mb-upi-id { min-width: 0; overflow-wrap: anywhere; font: 500 .92em/1.4 ui-monospace, 'Cascadia Mono', Consolas, monospace; letter-spacing: .01em; color: #ffe1c4; }
+.mb .mb-app { margin-top: .9em; padding: .8em 1.2em; font-size: 1em; }
+
+.mb-contacts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .5em; }
+.mb-contact { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .45em; padding: .85em .4em .75em; border-radius: .85em;
+  font-size: .85em; font-weight: 600; color: var(--paper); text-decoration: none; white-space: nowrap;
+  background: rgb(255 255 255 / .04); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .1); transition: background .2s, box-shadow .2s, transform .2s var(--ease); }
+.mb-contact:hover { background: rgb(255 255 255 / .08); box-shadow: inset 0 0 0 1px rgb(255 255 255 / .2); transform: translateY(-1px); }
+.mb-contact:focus-visible, .mb-upi .buy-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.mb-contact svg { width: 1.55em; height: 1.55em; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.mb-contact svg .fill { fill: currentColor; stroke: none; }
+
+.mb-foot { margin: 1.3em 0 0; padding-top: 1.1em; border-top: 1px solid var(--line); font-size: .85em; color: var(--quiet); text-align: center; text-wrap: balance; }
