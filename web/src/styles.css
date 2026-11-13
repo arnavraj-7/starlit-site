@@ -600,6 +600,14 @@ main { position: relative; z-index: 1; }
 .share-cards:hover img:nth-child(1) { transform: translateX(-104%) rotate(-14deg); }
 .share-cards:hover img:nth-child(2) { transform: translateX(4%) rotate(14deg); }
 .share-cards:hover img:nth-child(3) { transform: translate(-50%, -4%); }
+/* on a phone the fanned cards (and the styles window's glow) stayed wider than the screen, which
+   made phone browsers lay the whole page out wider and zoom it out */
+@media (max-width: 560px) {
+  .share-cards img { height: 66%; }
+  .share-cards img:nth-child(1), .share-cards:hover img:nth-child(1) { transform: translateX(-80%) rotate(-7deg); }
+  .share-cards img:nth-child(2), .share-cards:hover img:nth-child(2) { transform: translateX(-20%) rotate(7deg); }
+}
+@media (max-width: 860px) { .frame-glow { inset: -11% 0; } }
 
 /* OBS Studio 32 on Windows, its default dark theme (Yami) and dock layout, drawn at 1040 x 700 px
    and zoomed to fit (useFit). Colours are OBS's own: window #1d1f26, docks #272a33, dock titles and
