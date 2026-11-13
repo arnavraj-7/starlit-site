@@ -369,6 +369,7 @@ export function NeedleLine() {
     }
     let last = ''
     const tick = () => {
+      if (rec.classList.contains('is-off')) return                // the record is off screen
       const nd = rec.__needle
       if (!nd || !nd.lit) { if (last) { last = ''; setLine(null) } return }
       const { c, gap } = geom(), n = Math.round((c * 0.95 - nd.r / 50 * c) / gap)
@@ -377,9 +378,12 @@ export function NeedleLine() {
       const want = nd.ang - rho                                   // the record has turned under the needle
       let best = null, bd = 9
       for (const [i, m] of ring(n)) { const d = Math.abs(((m - want) % (Math.PI * 2) + Math.PI * 3) % (Math.PI * 2) - Math.PI); if (d < bd) { bd = d; best = i } }
-      if (best === null || bd > 0.2) return
+      // in the gap between two lines (the em spaces) the last line stays up: slicing there gave an
+      // empty line, which collapsed the pill to its equaliser
+      if (best === null || bd > 0.2 || text[best] === '\u2003') return
       const s = text.lastIndexOf('\u2003', best) + 1, e = text.indexOf('\u2003', best)
-      const words = text.slice(s, e < 0 ? undefined : e).split(' ')
+      const words = text.slice(s, e < 0 ? undefined : e).trim().split(/ +/)
+      if (!words[0]) return
       let at = 0, cur = 0
       for (let j = 0; j < words.length; j++) { if (best - s >= at) cur = j; at += words[j].length + 1 }
       const key = s + ':' + cur
@@ -388,10 +392,14 @@ export function NeedleLine() {
     const id = setInterval(tick, 110)
     return () => clearInterval(id)
   }, [])
+  // On a touch screen the arm can't be picked up; it drops by itself a moment after load.
+  const [idle] = useState(() => matchMedia('(hover: hover)').matches ? 'Put the needle on the record' : 'Dropping the needle…')
+  // Plain inline text (no flex items), so the pill always shrinks to the line and wraps between
+  // words only when the line is wider than the column.
   return (
     <p className={`needle-line ${line ? 'is-on' : ''}`} ref={ref} aria-live="off">
       <span className="nl-eq" aria-hidden="true"><i /><i /><i /></span>
-      {line ? line.words.map((w, j) => <span key={j} className={j < line.cur ? 'sung' : j === line.cur ? 'now' : ''}>{w} </span>) : <span>Put the needle on the record</span>}
+      <span className="nl-text">{line ? line.words.map((w, j) => <span key={j} className={j < line.cur ? 'sung' : j === line.cur ? 'now' : ''}>{w}{j < line.words.length - 1 ? ' ' : ''}</span>) : idle}</span>
     </p>
   )
 }

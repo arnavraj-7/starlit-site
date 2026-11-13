@@ -136,7 +136,7 @@ main { position: relative; z-index: 1; }
 /* first screen: the words on the left, the lyric record on the right; the app's screen follows below */
 .hero-row { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: clamp(26px, 3.4vh, 48px);
   min-height: calc(100vh - clamp(104px, 15vh, 176px) - 6vh); position: relative; z-index: 1; }
-.hero-side { max-width: clamp(340px, 30vw, 640px); }
+.hero-side { width: 100%; max-width: clamp(340px, 30vw, 640px); }
 .lead { font-size: var(--fs-lead); line-height: 1.5; color: var(--mute); margin: 0 0 1.3em; text-wrap: pretty; }
 .lead strong { color: var(--paper); font-weight: 600; }
 .cta-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
@@ -492,9 +492,9 @@ main { position: relative; z-index: 1; }
     radial-gradient(18% 22% at 90% 18%, rgb(255 110 70 / .2), transparent 75%); }
 
 /* ---------- hero: the line under the needle, and headline words that warm when you touch them ---------- */
-.needle-line { margin: 0 0 1.5em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 .02em; min-height: 1.6em;
-  font-size: clamp(1.15rem, 1.15vw, 1.8rem); font-weight: 600; letter-spacing: -.01em; color: rgb(255 255 255 / .28); transition: color .5s var(--ease); }
-.needle-line > span:not(.nl-dot) { transition: color .35s var(--ease), text-shadow .35s var(--ease); white-space: pre; }
+.needle-line { margin: 0 0 1.5em; min-height: 1.6em;
+  font-size: clamp(1.15rem, 1.15vw, 1.8rem); font-weight: 600; letter-spacing: -.01em; line-height: 1.45; color: rgb(255 255 255 / .5); transition: color .5s var(--ease); }
+.nl-text > span { transition: color .35s var(--ease), text-shadow .35s var(--ease); }
 .needle-line .sung { color: rgb(255 236 220 / .82); }
 .needle-line .now { color: #ffc496; text-shadow: 0 0 18px rgb(255 160 90 / .55); }
 .nl-dot { align-self: center; width: .42em; height: .42em; margin-right: .7em; border-radius: 50%; background: #ffc496; flex: none;
@@ -510,9 +510,10 @@ main { position: relative; z-index: 1; }
 .link-down:hover { color: var(--paper); }
 .link-down:hover span { transform: translateY(3px); }
 /* the line under the needle reads as "now playing": a pill with a small equaliser */
-.needle-line { display: inline-flex; width: fit-content; padding: 6px 16px 6px 12px; border-radius: 999px; font-size: clamp(1rem, .95vw, 1.45rem);
-  background: rgb(255 170 106 / .06); box-shadow: inset 0 0 0 1px rgb(255 170 106 / .22); }
-.nl-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: .7em; margin-right: .6em; align-self: center; }
+/* an inline block: shrink-to-fit on inline text is the same in every engine, at every width */
+.needle-line { display: inline-block; vertical-align: top; max-width: 100%; padding: .36em 1em .36em .78em; border-radius: 1.1em; font-size: clamp(1rem, .95vw, 1.45rem);
+  text-wrap: pretty; background: rgb(255 170 106 / .06); box-shadow: inset 0 0 0 1px rgb(255 170 106 / .22); }
+.nl-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: .7em; margin-right: .6em; vertical-align: -.04em; }
 .nl-eq i { width: 2px; height: 100%; border-radius: 1px; background: #ffc496; transform-origin: bottom; transform: scaleY(.35); }
 .needle-line.is-on .nl-eq i { animation: nl-eq .9s ease-in-out infinite alternate; }
 .needle-line.is-on .nl-eq i:nth-child(2) { animation-delay: -.3s; } .needle-line.is-on .nl-eq i:nth-child(3) { animation-delay: -.6s; }
