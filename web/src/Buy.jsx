@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Mark } from './Chrome.jsx'
 import './buy.css'
 
 // What the button says. Keep in step with STARLIT_PRICE on the server (59900 paise by default);
@@ -32,6 +33,17 @@ async function post(path, body) {
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+// The top of both purchase sheets: the price is the headline.
+export function PriceHead() {
+  return (
+    <div className="ph">
+      <p className="ph-kicker"><Mark />Starlit for Windows</p>
+      <p className="ph-price"><span className="ph-cur">{PRICE_LABEL.slice(0, 1)}</span>{PRICE_LABEL.slice(1)}</p>
+      <p className="ph-terms">once · yours forever · one PC</p>
+    </div>
+  )
+}
 
 function Spinner() { return <i className="buy-spin" aria-hidden="true" /> }
 
@@ -160,7 +172,7 @@ export default function BuySheet({ open, onClose: close, downloadUrl, glyph }) {
     <div className="buy-layer" onPointerDown={e => { if (e.target === e.currentTarget && closeable) onClose() }}>
       <div className="buy" role="dialog" aria-modal="true" aria-labelledby="buy-title" ref={panel} data-lenis-prevent>
         <div className="buy-head">
-          <h2 className="buy-title" id="buy-title">
+          <h2 className={`buy-title ${view === 'buy' ? 'sr-only' : ''}`} id="buy-title">
             {view === 'done' && result ? 'Your licence key' : view === 'recover' ? 'Get your key again' : 'Buy Starlit'}
           </h2>
           <span className="buy-head-end">
@@ -175,11 +187,7 @@ export default function BuySheet({ open, onClose: close, downloadUrl, glyph }) {
 
         {view === 'buy' && (
           <form onSubmit={pay} noValidate>
-            <div className="buy-line">
-              <img src="/icon-512.png" alt="" width="44" height="44" />
-              <span>Starlit<small>Lifetime licence for Windows</small></span>
-              <b>{PRICE_LABEL}</b>
-            </div>
+            <PriceHead />
             <label className="buy-label" htmlFor="buy-email">Email</label>
             <input id="buy-email" className="buy-input" type="email" autoComplete="email" inputMode="email" spellCheck="false" placeholder="you@example.com"
               value={email} onChange={e => setEmail(e.target.value)} disabled={busy} />
