@@ -133,7 +133,18 @@ function useSmoothScroll() {
     gsap.ticker.lagSmoothing(50, 16)        // a stalled frame pauses the animations; they never skip ahead
     if (reduceMotion()) { document.documentElement.classList.add('no-motion'); return }
     // Touch screens keep their own scrolling: it is already smooth and runs off the main thread.
-    const lenis = finePointer() ? new Lenis({ lerp: 0.09, smoothWheel: true }) : null
+    // Heavy: a wheel notch glides on and settles slowly (lerp .065, a little less distance per
+    // notch). A precision trackpad already sends its own momentum in small steps, so it gets a
+    // lighter hand and the page never trails the fingers.
+    let lenis = null
+    if (finePointer()) lenis = new Lenis({ lerp: 0.065, wheelMultiplier: 0.9, smoothWheel: true,
+      virtualScroll: ({ event }) => {
+        if (event.type === 'wheel' && lenis) {
+          const d = Math.abs(event.deltaY) || Math.abs(event.deltaX)
+          lenis.options.lerp = event.deltaMode === 0 && (d < 40 || d % 1 !== 0) ? 0.12 : 0.065
+        }
+        return true
+      } })
     window.__lenis = lenis
     const tick = t => lenis.raf(t * 1000)
     if (lenis) { lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(tick) }
@@ -474,7 +485,7 @@ function Styles() {
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: { trigger: root.current, start: 'top top', end: '+=330%', scrub: 0.5, pin: '.styles-pin', anticipatePin: 1, invalidateOnRefresh: true,
-          snap: { snapTo: [0, ...HOLD, 1], duration: { min: 0.25, max: 0.8 }, ease: 'power3.inOut' },
+          snap: { snapTo: [0, ...HOLD, 1], duration: { min: 0.3, max: 0.9 }, delay: 0.18, ease: 'power3.inOut' },
           onRefresh: s => { drumST.current = s },
           onEnter: () => setAccent(STYLES[0].accent), onEnterBack: () => setAccent(STYLES[Math.round(state.p)].accent) },
         onUpdate: () => {
