@@ -3,6 +3,7 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 // the record's type is drawn in a worker, which needs the font file itself
 import interUrl from '@fontsource-variable/inter/files/inter-latin-opsz-normal.woff2?url'
+import { lite } from './media.js'
 
 // The page's backgrounds are all made of dots and letters, drawn in code at the screen's own
 // resolution from small source pictures (generated with Gemini, in public/media/src). The
@@ -56,7 +57,7 @@ export function StippleSky() {
     let travel = 0, img = null, alive = true
     const draw = () => {
       if (!img) return
-      const dpr = Math.min(devicePixelRatio || 1, 2)
+      const dpr = Math.min(devicePixelRatio || 1, lite ? 1 : 2)
       const w = innerWidth, h = innerHeight, H = Math.round(h * 1.32)
       travel = H - h
       const sample = sampler(img, w, H, 2)
@@ -66,8 +67,9 @@ export function StippleSky() {
         cv.style.width = w + 'px'; cv.style.height = H + 'px'
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
         const rnd = rng(31 + li * 977), buckets = new Map()
-        for (let gy = 0; gy < H; gy += L.grid) for (let gx = 0; gx < w; gx += L.grid) {
-          const x = gx + rnd() * L.grid, y = gy + rnd() * L.grid
+        const grid = L.grid * (lite ? 1.4 : 1)            // about half the dots on a light setup
+        for (let gy = 0; gy < H; gy += grid) for (let gx = 0; gx < w; gx += grid) {
+          const x = gx + rnd() * grid, y = gy + rnd() * grid
           const c = sample(x, y), l = lum(c)
           if (l < L.floor) continue
           const p = L.gain * Math.pow((l - L.floor) / (1 - L.floor), L.gamma)
@@ -187,7 +189,7 @@ export function GrooveRecord() {
         cv.width = bm.width; cv.height = bm.height; cv.getContext('bitmaprenderer').transferFromImageBitmap(bm)
         if (--left === 0) el.classList.add('is-drawn')
       }
-      w.postMessage({ D: el.clientWidth, dpr: Math.min(devicePixelRatio || 1, 1.5), fontUrl: new URL(interUrl, location.href).href, lyrics: LYRICS, lit: isLit })
+      w.postMessage({ D: el.clientWidth, dpr: Math.min(devicePixelRatio || 1, lite ? 1 : 1.5), fontUrl: new URL(interUrl, location.href).href, lyrics: LYRICS, lit: isLit })
       return w
     })
     // only turns while it can be seen
