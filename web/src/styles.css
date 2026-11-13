@@ -467,7 +467,14 @@ main { position: relative; z-index: 1; }
 /* the side copy sits over the record's edge: a soft shade behind it keeps it readable */
 .hero-side { position: relative; }
 
-@media (max-width: 860px) { .groove { left: 70vw; top: 30vh; width: 120vw; opacity: .7; } }
+/* phones and narrow windows: the words first, then the whole record (arm and all) under them,
+   rising into view at the foot of the first screen instead of hiding half-cut behind the headline */
+@media (max-width: 860px) {
+  .hero { padding-bottom: calc(min(82vw, 470px) + clamp(28px, 6vh, 64px)); }
+  .hero-row { min-height: 0; }
+  .groove { left: 50%; top: auto; bottom: clamp(20px, 4vh, 48px); width: min(82vw, 470px); translate: -52% 0; }
+  .groove-hint { display: none; }
+}
 @media (prefers-reduced-motion: reduce) { .groove-spin { animation: none; } }
 
 /* ---------- styles: a full-bleed backdrop per style ---------- */

@@ -58,6 +58,64 @@ function WindowsGlyph() {
   )
 }
 
+function SendGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 14.5V3.5M7.8 7.7 12 3.5l4.2 4.2" /><path d="M8.5 10.5H7a2.5 2.5 0 0 0-2.5 2.5v5A2.5 2.5 0 0 0 7 20.5h10a2.5 2.5 0 0 0 2.5-2.5v-5a2.5 2.5 0 0 0-2.5-2.5h-1.5" />
+    </svg>
+  )
+}
+function ArrowGlyph() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4.5 12h14M13 6.5l5.5 5.5-5.5 5.5" /></svg>
+}
+
+// Starlit is a Windows app, so a phone can't download it: there the button sends the page on to the
+// visitor's PC (the share sheet, or the link copied). Buying still works on a phone; UPI is at home there.
+const touchOnly = () => matchMedia('(hover: none) and (pointer: coarse)').matches
+const SITE_URL = 'https://starlit-lyrics.vercel.app/'
+function useSendLink() {
+  const [note, setNote] = useState('')
+  const timer = useRef(0)
+  useEffect(() => () => clearTimeout(timer.current), [])
+  const send = async () => {
+    const url = location.hostname === 'localhost' ? location.origin + '/' : SITE_URL
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Starlit', text: 'Live lyrics for whatever’s playing on your PC.', url }); return }
+      catch (e) { if (e && e.name === 'AbortError') return }
+    }
+    let ok = false
+    try { await navigator.clipboard.writeText(url); ok = true } catch {}
+    setNote(ok ? 'Link copied. Open it on your PC' : url.replace(/^https:\/\/|\/$/g, ''))
+    clearTimeout(timer.current); timer.current = setTimeout(() => setNote(''), 3200)
+  }
+  return [note, send]
+}
+
+// One clear action, a quiet way to buy beside it, and the whole deal in one line underneath.
+function Cta({ onBuy, big = false, spark }) {
+  const [phone] = useState(touchOnly)
+  const [note, send] = useSendLink()
+  const cls = `btn ${big ? 'btn--big' : 'btn--hero'}`
+  const primary = phone
+    ? <button type="button" className={cls} onClick={send} aria-live="polite"><SendGlyph />{note || 'Send the link to my PC'}</button>
+    : <a className={cls} href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
+  return (
+    <div className={`cta ${big ? 'cta--big' : ''}`}>
+      <ClickSpark sparkColor="#ffffff" shape="star" {...spark} style={{ height: 'auto' }}>
+        <div className="cta-row">
+          {big ? <span className="orbit">{primary}</span> : primary}
+          <button type="button" className="cta-buy" onClick={onBuy}>Buy now<ArrowGlyph /></button>
+        </div>
+      </ClickSpark>
+      <p className="cta-terms">
+        {phone
+          ? <>Starlit runs on Windows 10 and 11. <b>3 days free, then {PRICE_LABEL} once.</b></>
+          : <><b>3 days free, then {PRICE_LABEL} once.</b> Yours to keep.</>}
+      </p>
+    </div>
+  )
+}
+
 // A heading whose words light up like a sung lyric.
 function Sung({ text, as: Tag = 'span', className = '' }) {
   return (
@@ -222,13 +280,7 @@ function Hero({ onBuy }) {
           <div className="hero-side">
             <p className="lead">Live lyrics for whatever’s playing on your PC.</p>
             <NeedleLine />
-            <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={9} sparkRadius={42} sparkSize={12} glow={0.6} duration={600} style={{ height: 'auto' }}>
-              <div className="cta-row">
-                <button type="button" className="btn btn--hero" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button>
-                <a className="btn btn--hero btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
-              </div>
-            </ClickSpark>
-            <p className="fineprint">Free for 3 days, then ₹599 once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
+            <Cta onBuy={onBuy} spark={{ sparkCount: 9, sparkRadius: 42, sparkSize: 12, glow: 0.6, duration: 600 }} />
           </div>
         </div>
       </div>
@@ -823,13 +875,7 @@ function Finale({ onBuy }) {
     <section className="finale" id="download" ref={root}>
       <div className="wrap">
         <Sung as="h2" className="h2" text="Try it with your own music." />
-        <ClickSpark sparkColor="#ffffff" shape="star" sparkCount={12} sparkRadius={60} sparkSize={14} glow={0.7} duration={700} style={{ height: 'auto' }}>
-          <div className="cta-row">
-            <span className="orbit"><button type="button" className="btn btn--big" onClick={onBuy}>Buy Starlit · {PRICE_LABEL}</button></span>
-            <a className="btn btn--big btn--alt" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
-          </div>
-        </ClickSpark>
-        <p className="fineprint">Free for 3 days, then ₹599 once. Windows 10 and 11. No account needed.</p>
+        <Cta onBuy={onBuy} big spark={{ sparkCount: 12, sparkRadius: 60, sparkSize: 14, glow: 0.7, duration: 700 }} />
       </div>
     </section>
   )
