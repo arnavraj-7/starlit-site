@@ -225,7 +225,7 @@ function Hero({ onBuy }) {
                 <a className={`btn btn--hero${SALES_OPEN ? ' btn--alt' : ''}`} href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a>
               </div>
             </ClickSpark>
-            <p className="fineprint">Free for 7 days, then ₹599 once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
+            <p className="fineprint">Free for 3 days, then ₹599 once · Windows 10 and 11 · Spotify, Apple Music, YouTube Music and your own files</p>
           </div>
         </div>
       </div>
@@ -828,7 +828,7 @@ function Finale({ onBuy }) {
               : <span className="orbit"><a className="btn btn--big" href={DOWNLOAD_URL}><WindowsGlyph />Download for Windows</a></span>}
           </div>
         </ClickSpark>
-        <p className="fineprint">Free for 7 days, then ₹599 once. Windows 10 and 11. No account needed.</p>
+        <p className="fineprint">Free for 3 days, then ₹599 once. Windows 10 and 11. No account needed.</p>
       </div>
     </section>
   )
