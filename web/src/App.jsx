@@ -632,12 +632,25 @@ function ObsMeter({ level }) {
   )
 }
 
+// The OBS preview is a few hundred pixels wide on a phone: half-size copies there.
+const STREAM_BG = small ? '/media/share/stream-bg-800.webp' : '/media/share/stream-bg.webp'
+const STREAM_LINE = small ? '/media/share/obs-960.webp' : '/media/share/obs.webp'
+
 // Beyond the PC's own screens: a phone, a post, a stream, a status. Each shown large and plain,
 // with what the app really makes (the phone's screen, saved cards, the overlay's own line).
 function Share() {
   const root = useRef(null), obs = useRef(null), dc = useRef(null)
   useFit(obs)
   useFit(dc, 0.94)
+  // The previews are lazy images far down a long page; on a slow line they used to be requested only
+  // as they scrolled in, behind the videos, and showed up empty. Now they're fetched one by one in the
+  // quiet after the intro (or, on a light connection, two screens ahead), and are decoded and waiting.
+  useEffect(() => {
+    const list = ['/media/share/phone.webp', '/media/share/card2.webp', '/media/share/card0.webp', '/media/share/card1.webp',
+      STREAM_BG, STREAM_LINE, '/media/share/avatar.webp', '/favicon.png']
+    const go = () => list.reduce((p, s) => p.then(() => warm(s)), Promise.resolve())
+    return lite ? whenNear(root.current, go, '200% 0px') : afterIntro(go, 300)
+  }, [])
   useGSAP(() => {
     if (reduceMotion()) return
     gsap.from('.share-item', { opacity: 0, y: 60, duration: 1.1, ease: 'expo.out', stagger: 0.1,
@@ -655,7 +668,7 @@ function Share() {
                 <i className="phone-btn phone-btn--action" /><i className="phone-btn phone-btn--up" /><i className="phone-btn phone-btn--down" /><i className="phone-btn phone-btn--side" />
                 <div className="phone-glass" />
                 <div className="phone-screen">
-                  <img src="/media/share/phone.webp" alt="" loading="lazy" />
+                  <img src="/media/share/phone.webp" alt="" width="786" height="1704" loading="lazy" decoding="async" />
                   <div className="phone-status" aria-hidden="true">
                     <span className="phone-time">9:41</span>
                     <span className="phone-icons">
@@ -674,9 +687,9 @@ function Share() {
           </article>
           <article className="share-item">
             <div className="share-vis share-cards">
-              <img src="/media/share/card0.webp" alt="" loading="lazy" />
-              <img src="/media/share/card1.webp" alt="" loading="lazy" />
-              <img src="/media/share/card2.webp" alt="A lyric card saved by Starlit" loading="lazy" />
+              <img src="/media/share/card0.webp" alt="" loading="lazy" decoding="async" />
+              <img src="/media/share/card1.webp" alt="" loading="lazy" decoding="async" />
+              <img src="/media/share/card2.webp" alt="A lyric card saved by Starlit" loading="lazy" decoding="async" />
             </div>
             <h3>Keep the line that hit</h3>
             <p>Press Ctrl+Alt+S to save the moment as a card or a 10-second clip, ready for your story.</p>
@@ -708,9 +721,9 @@ function Share() {
                   </div>
                   <div className="stream-preview">
                     <div className="stream-canvas">
-                      <img src="/media/share/stream-bg.webp" alt="" loading="lazy" />
+                      <img src={STREAM_BG} alt="" width="1600" height="900" loading="lazy" decoding="async" />
                       <div className="stream-source">
-                        <img src="/media/share/obs.webp" alt="" loading="lazy" />
+                        <img src={STREAM_LINE} alt="" width="1920" height="320" loading="lazy" decoding="async" />
                         {['tl', 'tc', 'tr', 'ml', 'mr', 'bl', 'bc', 'br'].map(h => <i key={h} className={`stream-handle stream-handle--${h}`} />)}
                       </div>
                     </div>
@@ -768,15 +781,15 @@ function Share() {
                   large image, Starlit as the small one with the sung line as its hover text, start/end times */}
               <div className="presence" ref={dc} role="img" aria-label="A Discord profile: Listening to Starlit, Slow Satellites by Ivo Marin, 1:14 of 3:36">
                 <div className="presence-banner" />
-                <div className="presence-avatar"><img src="/media/share/avatar.webp" alt="" /><i /></div>
+                <div className="presence-avatar"><img src="/media/share/avatar.webp" alt="" width="256" height="256" loading="lazy" decoding="async" /><i /></div>
                 <div className="presence-body">
                   <div className="presence-name"><b>Mira</b><span>mira.wav</span></div>
                   <div className="presence-card">
                     <div className="presence-head">Listening to Starlit</div>
                     <div className="presence-row">
                       <div className="presence-art">
-                        <img src="/media/covers/a.webp" alt="" />
-                        <img className="presence-small" src="/icon-512.png" alt="" />
+                        <img src="/media/covers/a.webp" alt="" width="64" height="64" loading="lazy" decoding="async" />
+                        <img className="presence-small" src="/favicon.png" alt="" width="26" height="26" loading="lazy" decoding="async" />
                         <span className="presence-tip">“Carry us tonight”</span>
                         <svg className="presence-cursor" viewBox="0 0 13 20" aria-hidden="true"><path d="M1 1v15.5l3.8-3.6 2.6 6 2.4-1-2.5-5.9h5.3z" /></svg>
                       </div>
