@@ -109,7 +109,7 @@ function Cta({ onBuy, big = false, spark }) {
       </ClickSpark>
       <p className="cta-terms">
         {phone
-          ? <>Starlit runs on Windows 10 and 11. <b>3 days free, then {PRICE_LABEL} once.</b></>
+          ? <><b>3 days free, then {PRICE_LABEL} once.</b> Starlit runs on Windows 10 and 11.</>
           : <><b>3 days free, then {PRICE_LABEL} once.</b> Yours to keep.</>}
       </p>
     </div>
